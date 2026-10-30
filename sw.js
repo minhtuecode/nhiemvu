@@ -1,5 +1,5 @@
-// Offline cache for "Nhiệm Vụ của Minh Tuệ". Bump VERSION when files change.
-const VERSION = 'nvmt-v1';
+// Offline cache for "Nhiệm Vụ của Bé". Bump VERSION when files change.
+const VERSION = 'nvmt-v2';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 

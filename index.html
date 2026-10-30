@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#6B4DF5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Minh Tuệ">
+<meta name="apple-mobile-web-app-title" content="Nhiệm Vụ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Nhiệm Vụ của Minh Tuệ</title>
+<title>Nhiệm Vụ của Bé</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
@@ -263,6 +263,7 @@ const mondayOf = s => addDays(s,-wdIdx(s));
 const monthOf = s => s.slice(0,7);
 const sum = (a,f) => a.reduce((x,y)=>x+f(y),0);
 const shortD = s => s.slice(8,10)+'/'+s.slice(5,7);
+const slug = s => (String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/gi,'d').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')) || 'be';
 
 function defaultState(today){
   const T = (id,name,icon,kind,min,x) => Object.assign({id,name,icon,kind,min,pts:kind==='bonus'?2:0,noMakeup:false,color:'sun',archived:false},x||{});
@@ -500,9 +501,9 @@ function buildICS(S,today){
   const stamp = today.replace(/-/g,'');
   const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nhiem Vu cua Minh Tue//VI','CALSCALE:GREGORIAN'];
   S.settings.reminders.filter(r=>r.on && /^\d{2}:\d{2}$/.test(r.t)).forEach((r,i) => {
-    L.push('BEGIN:VEVENT','UID:nvmt-'+i+'-'+stamp+'@local','DTSTAMP:'+stamp+'T000000',
+    L.push('BEGIN:VEVENT','UID:nvmt-'+slug(S.settings.kid)+'-'+i+'-'+stamp+'@local','DTSTAMP:'+stamp+'T000000',
       'DTSTART:'+stamp+'T'+r.t.replace(':','')+'00','DURATION:PT15M','RRULE:FREQ=DAILY',
-      'SUMMARY:'+r.label.replace(/[\r\n,;]/g,' '),
+      'SUMMARY:'+(S.settings.kid+': '+r.label).replace(/[\r\n,;]/g,' '),
       'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:'+r.label.replace(/[\r\n,;]/g,' '),'END:VALARM','END:VEVENT');
   });
   L.push('END:VCALENDAR');
@@ -511,11 +512,31 @@ function buildICS(S,today){
 // ==/LOGIC==
 
 // ==UI==
-const KEY = 'nvmt_v1';
+/* Nhiều bạn nhỏ: mỗi bạn một khoá lưu riêng. Bạn đầu tiên giữ khoá cũ 'nvmt_v1' nên dữ liệu đang có không mất. */
+const PKEY = 'nvmt_profiles';
+function loadProf(){
+  try{
+    const p = JSON.parse(localStorage.getItem(PKEY));
+    if(p && Array.isArray(p.list) && p.list.length){
+      if(!p.list.some(x=>x.id===p.active)) p.active = p.list[0].id;
+      return p;
+    }
+  }catch(e){}
+  return {list:[{id:'p1',key:'nvmt_v1'}],active:'p1'};
+}
+let PROF = loadProf();
+function saveProf(){ try{ localStorage.setItem(PKEY,JSON.stringify(PROF)); }catch(e){} }
+const curProf = () => PROF.list.find(x=>x.id===PROF.active);
+let KEY = curProf().key;
+function profName(p){
+  if(p.id === PROF.active && S) return S.settings.kid;
+  try{ const o = JSON.parse(localStorage.getItem(p.key)); if(o && o.settings && o.settings.kid) return o.settings.kid; }catch(e){}
+  return 'Bạn nhỏ';
+}
 let TODAY = fmtD(new Date());
 let S = null, storageOK = true;
 const ui = {tab:'today',parent:false,ptab:'plan',pin:null,modal:null,planWeek:mondayOf(TODAY),calMonth:monthOf(TODAY),
-  calSel:null,selTask:null,fixDate:TODAY,banner:null,toast:null,badgeQueue:[],confirmReset:false,backupText:'',pendingImport:null,icsText:''};
+  calSel:null,selTask:null,fixDate:TODAY,banner:null,toast:null,badgeQueue:[],confirmReset:false,backupText:'',pendingImport:null,icsText:'',confirmDelProf:false};
 
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fp = n => (Math.round(n*10)/10).toString().replace('.',',');
@@ -578,6 +599,7 @@ const ICON = {
   cal:'<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   badge:'<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>',
   gift:'<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M12 10v10M4 14h16M12 10C9 10 8 5 11 5s1 5 1 5zM12 10c3 0 4-5 1-5s-1 5-1 5z"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.500 20c0-3.600 2.900-6 6.500-6s6.500 2.400 6.500 6"/><circle cx="17" cy="9" r="2.500"/><path d="M17 14c2.600 0 4.500 1.800 4.500 5"/>',
   lock:'<rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
 };
 const svgI = k => '<svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[k]+'</svg>';
@@ -879,6 +901,7 @@ function header(){
     '<div class="grow"><h1>Nhiệm Vụ của '+esc(S.settings.kid)+'</h1><p class="say">'+esc(S.settings.mascot)+': '+esc(ml.text)+'</p></div>'+
     '<div class="row"><span class="pill'+(st.frozen&&info.status!=='ok'?' ice':'')+'" title="Streak">'+flame(st.frozen&&info.status!=='ok')+'<span class="num">'+st.streak+'</span></span>'+
     '<span class="pill shield" title="Băng bảo vệ tuần này">Băng '+(shieldFree?'1':'0')+'/1</span>'+
+    (PROF.list.length>1 ? '<button class="lockbtn" data-act="openWho" aria-label="Đổi bạn nhỏ" title="Đổi bạn">'+svgI('users')+'</button>' : '')+
     '<button class="lockbtn" data-act="openPin" aria-label="Khu phụ huynh">'+svgI('lock')+'</button></div></header>';
 }
 function tabbar(){
@@ -932,7 +955,11 @@ function viewSettings(){
   const s = S.settings;
   const rem = s.reminders.map((r,i)=>'<div class="row"><input class="in" style="width:120px" type="time" value="'+r.t+'" data-rem="t" data-i="'+i+'" aria-label="Giờ nhắc"><input class="in grow" value="'+esc(r.label)+'" data-rem="label" data-i="'+i+'" aria-label="Nội dung nhắc"><label class="chkrow"><input type="checkbox" '+(r.on?'checked':'')+' data-rem="on" data-i="'+i+'"> Bật</label><button class="x" data-act="remDel" data-i="'+i+'" aria-label="Xóa nhắc">×</button></div>').join('');
   const lastB = S.lastBackup ? 'ngày '+shortD(S.lastBackup) : 'chưa lần nào';
-  return '<section class="card"><h3 style="margin-bottom:10px">Thông tin chung</h3><div class="form">'+
+  const profs = '<section class="card"><div class="row" style="justify-content:space-between"><h3>Các bạn nhỏ</h3><button class="btn small" data-act="profNew">+ Thêm bạn nhỏ</button></div>'+
+    '<div class="list" style="margin-top:10px">'+PROF.list.map(p=>'<div class="li"><span class="ic" aria-hidden="true">🐱</span><span class="grow"><b>'+esc(profName(p))+'</b></span>'+(p.id===PROF.active?'<span class="tag bonus">Đang xem</span>':'<button class="btn ghost small" data-act="switchProf" data-id="'+p.id+'">Chuyển</button>')+'</div>').join('')+'</div>'+
+    '<p class="muted small" style="margin-top:8px">Mỗi bạn có nhiệm vụ, điểm, streak, huy hiệu, quà, mã PIN và bản sao lưu riêng. Các mục bên dưới là của bạn đang xem. Đổi tên ở ô “Tên của bé”.</p>'+
+    (PROF.list.length>1 ? (ui.confirmDelProf ? '<div class="banner warn" style="margin-top:10px"><span class="grow">Xóa hẳn '+esc(S.settings.kid)+' cùng toàn bộ điểm, streak, huy hiệu và quà? Không thể hoàn tác.</span><button class="btn" data-act="profDelYes">Xóa bạn này</button><button class="btn ghost" data-act="profDelNo">Giữ lại</button></div>' : '<div style="margin-top:10px"><button class="btn coral small" data-act="profDelAsk">Xóa bạn '+esc(S.settings.kid)+'</button></div>') : '')+'</section>';
+  return profs+'<section class="card"><h3 style="margin-bottom:10px">Thông tin chung</h3><div class="form">'+
     '<div class="field"><label for="s-kid">Tên của bé</label><input class="in" id="s-kid" value="'+esc(s.kid)+'" data-set="kid"></div>'+
     '<div class="field"><label for="s-mascot">Tên linh vật</label><input class="in" id="s-mascot" value="'+esc(s.mascot)+'" data-set="mascot"></div>'+
     '<div class="field"><label for="s-pin">Mã PIN phụ huynh (4 số)</label><input class="in" id="s-pin" inputmode="numeric" maxlength="4" value="'+esc(s.pin)+'" data-set="pin"></div>'+
@@ -983,6 +1010,17 @@ function modalHTML(){
       '<p class="muted small">'+(e?'Sai mã, thử lại nhé':'Chỉ bố mẹ biết mã này')+'</p><div class="keys">'+
       [1,2,3,4,5,6,7,8,9].map(n=>'<button data-act="pinKey" data-k="'+n+'">'+n+'</button>').join('')+
       '<button data-act="pinDel" aria-label="Xóa">⌫</button><button data-act="pinKey" data-k="0">0</button><button data-act="pinClose" aria-label="Đóng">✕</button></div></div>';
+  } else if(m.type === 'who'){
+    inner = '<div class="sheet center" role="dialog" aria-label="Chọn bạn nhỏ"><h2>Ai đang làm nhiệm vụ?</h2><div class="list" style="width:100%">'+
+      PROF.list.map(p=>'<button class="rwd'+(p.id===PROF.active?' on':'')+'" data-act="switchProf" data-id="'+p.id+'"><span class="ic" aria-hidden="true">🐱</span><span class="grow"><b>'+esc(profName(p))+'</b></span></button>').join('')+'</div>'+
+      '<button class="linkbtn" data-act="whoAdd">+ Thêm bạn nhỏ (phụ huynh)</button><button class="btn ghost" data-act="modalClose">Đóng</button></div>';
+  } else if(m.type === 'profnew'){
+    const d = m.draft;
+    inner = '<div class="sheet" role="dialog" aria-label="Thêm bạn nhỏ"><h2>Thêm bạn nhỏ</h2><div class="form">'+
+      '<div class="field"><label for="d-pname">Tên của bạn nhỏ</label><input class="in" id="d-pname" value="'+esc(d.name)+'" data-draft="name"></div>'+
+      '<div class="field"><label for="d-pmascot">Tên linh vật</label><input class="in" id="d-pmascot" value="'+esc(d.mascot)+'" data-draft="mascot"></div></div>'+
+      '<label class="chkrow"><input type="checkbox" '+(d.copy?'checked':'')+' data-draft="copy"> Sao chép nhiệm vụ, lịch tuần và phần thưởng của '+esc(S.settings.kid)+' (điểm và streak bắt đầu lại từ 0)</label>'+
+      '<div class="row"><button class="btn mint" data-act="profCreate">Thêm</button><button class="btn ghost" data-act="modalClose">Hủy</button></div></div>';
   } else if(m.type === 'badge'){
     const b = BADGES.find(x=>x.id===m.id);
     inner = '<div class="sheet center c-'+b.c+'"><p class="muted">Huy hiệu mới!</p><div class="badge" style="box-shadow:none"><div class="med" style="width:110px;height:110px;font-size:58px">'+b.icon+'</div></div><h2>'+b.name+'</h2><p>'+b.desc+'</p><button class="btn" data-act="badgeOk">Tuyệt vời!</button></div>';
@@ -1017,6 +1055,7 @@ function modalHTML(){
 
 function render(){
   if(!S) return;
+  document.title = 'Nhiệm Vụ của '+S.settings.kid;
   const app = document.getElementById('app');
   let h = '<div class="wrap">';
   if(ui.banner) h += '<div class="banner info" role="status"><span class="grow">'+esc(ui.banner)+'</span><button class="btn" data-act="bannerOk">Biết rồi</button></div>';
@@ -1030,6 +1069,52 @@ function render(){
 }
 
 /* ---------- events ---------- */
+function resetUi(){
+  Object.assign(ui,{tab:'today',parent:false,ptab:'plan',pin:null,modal:null,planWeek:mondayOf(TODAY),calMonth:monthOf(TODAY),
+    calSel:null,selTask:null,fixDate:TODAY,banner:null,toast:null,badgeQueue:[],confirmReset:false,backupText:'',pendingImport:null,icsText:'',confirmDelProf:false});
+  window.scrollTo(0,0);
+}
+function enterProfile(){
+  ensureMaterialized(S,TODAY);
+  const fresh = checkBadges(S,TODAY);
+  save(); resetUi();
+  if(fresh.length){ ui.badgeQueue.push(...fresh); openNextBadge(); }
+  render();
+}
+function switchProfile(id){
+  if(id === PROF.active){ ui.modal = null; return render(); }
+  const p = PROF.list.find(x=>x.id===id); if(!p) return;
+  save();
+  PROF.active = id; saveProf(); KEY = p.key;
+  S = load() || defaultState(TODAY);
+  enterProfile();
+}
+function newProfModal(){ return {type:'profnew',draft:{name:'',mascot:'Mướp',copy:true}}; }
+function createProfile(dr){
+  const name = (dr.name||'').trim(); if(!name){ toast('Nhớ đặt tên cho bạn nhỏ'); return; }
+  save();
+  const id = 'p'+Date.now().toString(36), key = 'nvmt_'+id;
+  const ns = defaultState(TODAY);
+  if(dr.copy){
+    const src = JSON.parse(JSON.stringify(S));
+    ns.tasks = src.tasks; ns.template = src.template; ns.rewards = src.rewards; ns.settings = src.settings;
+  } else {
+    ns.tasks = []; ns.template = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+  }
+  ns.settings.kid = name; ns.settings.mascot = (dr.mascot||'').trim() || 'Mướp';
+  PROF.list.push({id,key}); PROF.active = id; saveProf(); KEY = key;
+  S = ns; enterProfile(); ui.parent = true; ui.ptab = 'tasks'; render();
+  toast('Đã thêm '+name+'. Chỉnh nhiệm vụ cho bạn ở đây nhé');
+}
+function deleteActiveProfile(){
+  if(PROF.list.length < 2) return;
+  const gone = curProf();
+  try{ localStorage.removeItem(gone.key); }catch(e){}
+  PROF.list = PROF.list.filter(x=>x.id !== gone.id);
+  PROF.active = PROF.list[0].id; saveProf(); KEY = curProf().key;
+  S = load() || defaultState(TODAY);
+  enterProfile();
+}
 function openPin(after){ ui.modal = {type:'pin',buf:'',after:after||null}; ui.pinErr = false; render(); }
 function claim(kind,key){
   ui.modal = {type:'pick',kind,key,sel:[]}; render();
@@ -1060,13 +1145,23 @@ function act(a,d,el){
     case 'tick': return tickToday(d.id);
     case 'tickMk': return tickMakeup(d.date,d.id);
     case 'openPin': return openPin(null);
+    case 'openWho': ui.modal = {type:'who'}; break;
+    case 'switchProf': return switchProfile(d.id);
+    case 'whoAdd': ui.modal = {type:'pin',buf:'',after:{act:'profAdd'}}; ui.pinErr = false; break;
+    case 'profNew': ui.modal = newProfModal(); break;
+    case 'profCreate': return createProfile(ui.modal.draft);
+    case 'profDelAsk': ui.confirmDelProf = true; break;
+    case 'profDelNo': ui.confirmDelProf = false; break;
+    case 'profDelYes': return deleteActiveProfile();
     case 'pinKey': {
       const m = ui.modal; if(!m || m.type !== 'pin' || m.buf.length >= 4) return;
       m.buf += d.k;
       if(m.buf.length === 4){
         if(m.buf === S.settings.pin){
           const after = m.after; ui.modal = null; ui.pinErr = false;
-          if(after && after.act === 'useVoucher') useVoucher(after.id); else ui.parent = true;
+          if(after && after.act === 'useVoucher') useVoucher(after.id);
+          else if(after && after.act === 'profAdd'){ ui.parent = true; ui.ptab = 'settings'; ui.modal = newProfModal(); }
+          else ui.parent = true;
         } else { ui.pinErr = true; m.buf = ''; }
       } else ui.pinErr = false;
       break;
@@ -1134,12 +1229,12 @@ function act(a,d,el){
     case 'remDel': S.settings.reminders.splice(+d.i,1); save(); break;
     case 'icsMake': {
       const txt = buildICS(S,TODAY); ui.icsText = txt;
-      saveFile('nhac-gio-minh-tue.ics',txt,'text/calendar').then(()=>render());
+      saveFile('nhac-gio-'+slug(S.settings.kid)+'.ics',txt,'text/calendar').then(()=>render());
       break;
     }
     case 'bkSave': {
       const txt = JSON.stringify(exportObj()); ui.backupText = txt;
-      saveFile('nhiem-vu-minh-tue-'+TODAY+'.json',txt,'application/json').then(r=>{
+      saveFile('nhiem-vu-'+slug(S.settings.kid)+'-'+TODAY+'.json',txt,'application/json').then(r=>{
         if(r === 'saved'){ S.lastBackup = TODAY; save(); toast('Đã lưu file sao lưu'); }
         else if(r === 'anchor'){ S.lastBackup = TODAY; save(); toast('Đã yêu cầu tải file. Nếu không thấy, hãy chép mã bên dưới.'); }
         else render();
@@ -1272,6 +1367,8 @@ if(!S){ S = defaultState(TODAY); }
 ensureMaterialized(S,TODAY);
 checkBadges(S,TODAY);
 save();
+saveProf();
+if(PROF.list.length > 1) ui.modal = {type:'who'};
 render();
 // ==/UI==
 </script>
