@@ -1,0 +1,1286 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6B4DF5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Minh Tuệ">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Nhiệm Vụ của Minh Tuệ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one-column game-style app for iPad. Header with mascot and streak, one screen at a time, fixed tab bar. The parent area replaces the tab bar. */
+:root{
+  --bg:#EDF3FF; --surface:#FFFFFF; --surface2:#E2EBFB; --ink:#1B2547; --muted:#58668C; --line:#CFDAF1;
+  --grape:#6B4DF5; --on-grape:#FFFFFF;
+  --sun:#FFB020; --mint:#1FBF85; --coral:#FF6459; --sky:#2E9BFF; --ice:#9ADCFF;
+  --on-bright:#10193A;
+  --sun-soft:#FFF0CC; --mint-soft:#D3F6E9; --sky-soft:#D6EBFF; --coral-soft:#FFDEDA; --grape-soft:#E7E1FF;
+  --shadow:0 2px 0 rgba(27,37,71,.10),0 12px 24px -14px rgba(27,37,71,.45);
+  --font-display:"Baloo 2","Nunito",ui-rounded,"SF Pro Rounded","Trebuchet MS",system-ui,sans-serif;
+  --font-body:"Nunito",ui-rounded,system-ui,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1530; --surface:#1A2350; --surface2:#232F63; --ink:#EEF2FF; --muted:#A9B5DC; --line:#303D75;
+    --grape:#8F77FF; --on-grape:#0F1530;
+    --sun:#FFC24A; --mint:#3BDBA3; --coral:#FF7E74; --sky:#5AB3FF; --ice:#9ADCFF;
+    --on-bright:#10193A;
+    --sun-soft:#4B3B14; --mint-soft:#12433A; --sky-soft:#143B69; --coral-soft:#502633; --grape-soft:#30296E;
+    --shadow:0 2px 0 rgba(0,0,0,.35),0 12px 24px -14px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1530; --surface:#1A2350; --surface2:#232F63; --ink:#EEF2FF; --muted:#A9B5DC; --line:#303D75;
+  --grape:#8F77FF; --on-grape:#0F1530;
+  --sun:#FFC24A; --mint:#3BDBA3; --coral:#FF7E74; --sky:#5AB3FF; --ice:#9ADCFF;
+  --on-bright:#10193A;
+  --sun-soft:#4B3B14; --mint-soft:#12433A; --sky-soft:#143B69; --coral-soft:#502633; --grape-soft:#30296E;
+  --shadow:0 2px 0 rgba(0,0,0,.35),0 12px 24px -14px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45;
+  padding-block:12px 0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent;
+}
+h1,h2,h3,h4{font-family:var(--font-display);margin:0;line-height:1.1;text-wrap:balance;font-weight:800}
+h2{font-size:22px} h3{font-size:18px}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.card{background:var(--surface);border-radius:22px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card.flat{box-shadow:none;border:1px solid var(--line)}
+.c-sun{--tc:var(--sun);--ts:var(--sun-soft)} .c-mint{--tc:var(--mint);--ts:var(--mint-soft)}
+.c-sky{--tc:var(--sky);--ts:var(--sky-soft)} .c-coral{--tc:var(--coral);--ts:var(--coral-soft)}
+.c-grape{--tc:var(--grape);--ts:var(--grape-soft)}
+
+/* header */
+.hero{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--grape);color:var(--on-grape)}
+.hero h1{font-size:26px}
+.hero .say{font-size:15px;opacity:.95;max-width:46ch}
+.mascot{width:84px;height:84px;flex:none}
+.mascot.cheer{animation:bob .7s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-6px) rotate(3deg)}}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-weight:800;font-family:var(--font-display);font-size:18px;background:var(--surface);color:var(--ink)}
+.pill svg{width:22px;height:22px}
+.pill.ice{background:var(--ice);color:var(--on-bright)}
+.pill.shield{font-size:14px;background:var(--sky);color:var(--on-bright)}
+.lockbtn{border:0;border-radius:14px;min-width:46px;min-height:46px;display:grid;place-items:center;background:rgba(255,255,255,.2);color:inherit}
+.lockbtn svg{width:24px;height:24px}
+
+/* buttons */
+.btn{border:0;border-radius:16px;min-height:46px;padding:10px 18px;font-weight:800;background:var(--grape);color:var(--on-grape);box-shadow:0 3px 0 rgba(0,0,0,.22)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.22)}
+.btn.mint{background:var(--mint);color:var(--on-bright)}
+.btn.sun{background:var(--sun);color:var(--on-bright)}
+.btn.coral{background:var(--coral);color:var(--on-bright)}
+.btn.ghost{background:var(--surface2);color:var(--ink);box-shadow:none}
+.btn.small{min-height:38px;padding:6px 12px;font-size:14px;border-radius:12px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.linkbtn{background:none;border:0;color:var(--grape);font-weight:800;padding:8px;min-height:40px;text-decoration:underline}
+
+/* today */
+.sum{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.ring{width:112px;height:112px;flex:none;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--font-display);font-weight:800}
+.ring .c b{font-size:30px;line-height:1}
+.ring .c span{font-size:13px;color:var(--muted);font-family:var(--font-body);font-weight:700}
+.sec{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:4px}
+.tasks{display:flex;flex-direction:column;gap:10px}
+.task{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:20px;padding:12px 14px;box-shadow:var(--shadow);min-width:0;border:2px solid transparent;width:100%;text-align:left}
+.task .ic{width:54px;height:54px;border-radius:18px;background:var(--ts);display:grid;place-items:center;font-size:28px;flex:none}
+.task .tx{flex:1;min-width:0}
+.task .tx b{display:block;font-size:17px;overflow-wrap:anywhere}
+.task .tx span{font-size:14px;color:var(--muted)}
+.chk{width:46px;height:46px;border-radius:50%;border:3px solid var(--line);display:grid;place-items:center;flex:none;background:var(--surface)}
+.chk svg{width:26px;height:26px;stroke:var(--on-bright);opacity:0}
+.task.done{border-color:var(--mint)}
+.task.done .tx b{text-decoration:line-through;color:var(--muted)}
+.task.done .chk{background:var(--mint);border-color:var(--mint);animation:pop .35s ease}
+.task.done .chk svg{opacity:1}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.task.mk{border-style:dashed;border-color:var(--coral)}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800;background:var(--ts,var(--surface2));color:var(--ink)}
+.tag.bonus{background:var(--sun);color:var(--on-bright)}
+.tag.coral{background:var(--coral);color:var(--on-bright)}
+.banner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-radius:20px;padding:14px 16px;background:var(--sun);color:var(--on-bright);font-weight:800}
+.banner.warn{background:var(--coral)}
+.banner.info{background:var(--sky)}
+.banner .grow{min-width:180px}
+.empty{text-align:center;padding:24px 12px;color:var(--muted)}
+
+/* bars and charts */
+.bar{height:16px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--mint)}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:700}
+.chart .val{fill:var(--ink);font-family:var(--font-display);font-size:14px}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .goal{stroke:var(--coral);stroke-width:2;stroke-dasharray:6 5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surface2);border-radius:16px;padding:12px}
+.stat b{display:block;font-family:var(--font-display);font-size:26px;line-height:1.1}
+.stat span{font-size:13px;color:var(--muted);font-weight:700}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th,.tbl td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tbl th{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.scroll{overflow-x:auto}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .h{text-align:center;font-weight:800;font-size:13px;color:var(--muted);padding:4px 0}
+.day{aspect-ratio:1/1;max-width:100%;border:2px solid transparent;border-radius:14px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:800;min-width:0;padding:2px}
+.day small{font-size:11px;color:inherit;opacity:.85;font-weight:700}
+.day.ok{background:var(--mint);color:var(--on-bright)}
+.day.part{background:var(--sun);color:var(--on-bright)}
+.day.miss,.day.freeze{background:var(--coral);color:var(--on-bright)}
+.day.shield{background:var(--sky);color:var(--on-bright)}
+.day.none{background:var(--surface2);color:var(--muted)}
+.day.future{background:transparent;border-color:var(--line);color:var(--muted)}
+.day.today{border-color:var(--grape);box-shadow:0 0 0 3px var(--grape)}
+.day.sel{outline:3px solid var(--ink)}
+.day.void{visibility:hidden}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:4px;vertical-align:-1px}
+
+/* badges */
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.badge{border-radius:20px;padding:14px 10px;text-align:center;background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;align-items:center}
+.badge .med{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:34px;background:var(--ts)}
+.badge.locked{box-shadow:none;border:2px dashed var(--line);background:transparent}
+.badge.locked .med{filter:grayscale(1);opacity:.4}
+.badge b{font-family:var(--font-display);font-size:16px;line-height:1.15}
+.badge span{font-size:13px;color:var(--muted)}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(10px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-right,0px))}
+.tabbar nav{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.tab{border:0;background:none;border-radius:14px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:800;font-size:12px;color:var(--muted);position:relative}
+.tab svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{background:var(--grape-soft);color:var(--grape)}
+.tab .dot{position:absolute;top:6px;right:calc(50% - 22px);width:12px;height:12px;border-radius:50%;background:var(--coral);border:2px solid var(--surface)}
+
+/* parent */
+.ptabs{display:flex;gap:8px;flex-wrap:wrap}
+.ptab{border:0;border-radius:14px;padding:10px 14px;min-height:44px;font-weight:800;background:var(--surface2);color:var(--ink)}
+.ptab.on{background:var(--grape);color:var(--on-grape)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.pcol{background:var(--surface2);border-radius:16px;padding:8px;min-height:150px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pcol.over{outline:3px dashed var(--grape)}
+.pcol.lock{opacity:.55}
+.pcol h4{font-size:16px;display:flex;justify-content:space-between;gap:6px}
+.chip{display:flex;gap:6px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:6px 8px;font-size:14px;font-weight:700;min-width:0;touch-action:manipulation}
+.chip .nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.chip em{font-style:normal;font-size:12px;color:var(--muted)}
+.chip.bonus{border-color:var(--sun)}
+.chip.sel{border-color:var(--grape);background:var(--grape-soft)}
+.chip[draggable="true"]{cursor:grab}
+.x{border:0;background:var(--surface2);color:var(--ink);border-radius:8px;width:28px;height:28px;font-weight:800;flex:none}
+.lib{display:flex;gap:8px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label,.lab{font-weight:800;font-size:14px}
+.in{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;min-height:44px;width:100%;min-width:0}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.picker{display:flex;gap:6px;flex-wrap:wrap}
+.pick{border:2px solid var(--line);background:var(--surface);border-radius:12px;width:44px;height:44px;font-size:22px}
+.pick.on{border-color:var(--grape);background:var(--grape-soft)}
+.sw{width:36px;height:36px;border-radius:50%;border:3px solid var(--surface);background:var(--tc);box-shadow:0 0 0 2px var(--line)}
+.sw.on{box-shadow:0 0 0 3px var(--ink)}
+.chkrow{display:flex;gap:8px;align-items:center;min-height:40px;font-weight:700}
+.chkrow input{width:22px;height:22px;accent-color:var(--grape)}
+.code{width:100%;min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.list{display:flex;flex-direction:column;gap:8px}
+.li{display:flex;gap:10px;align-items:center;background:var(--surface2);border-radius:14px;padding:8px 10px;min-width:0}
+.li .ic{font-size:24px}
+
+/* modal */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(10,14,35,.6);display:grid;place-items:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet{background:var(--surface);border-radius:26px;padding:20px;width:100%;max-width:560px;max-height:calc(100vh - 32px);overflow:auto;display:flex;flex-direction:column;gap:14px}
+.sheet.center{text-align:center;align-items:center}
+.pin-dots{display:flex;gap:12px;justify-content:center}
+.pin-dots i{width:18px;height:18px;border-radius:50%;border:3px solid var(--line)}
+.pin-dots i.f{background:var(--grape);border-color:var(--grape)}
+.pin-dots.err{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.keys{display:grid;grid-template-columns:repeat(3,72px);gap:10px;justify-content:center}
+.keys button{height:64px;border-radius:18px;border:0;background:var(--surface2);font-family:var(--font-display);font-size:26px;font-weight:800}
+.rwd{display:flex;gap:12px;align-items:center;border:3px solid var(--line);background:var(--surface);border-radius:18px;padding:10px 12px;text-align:left;width:100%;min-height:60px}
+.rwd.on{border-color:var(--grape);background:var(--grape-soft)}
+.rwd .ic{font-size:30px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 16px;font-weight:800;max-width:90vw}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+@media (prefers-reduced-motion: reduce){
+  .mascot.cheer,.task.done .chk,.pin-dots.err{animation:none}
+}
+@media (max-width:520px){
+  .hero h1{font-size:22px}
+  .keys{grid-template-columns:repeat(3,64px)}
+  .cal{gap:4px}
+}
+</style>
+</head>
+<body>
+
+
+<div id="app"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script>
+// ==LOGIC==
+const APP = 'nhiem-vu-minh-tue';
+const WD = ['Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy','Chủ Nhật'];
+const WS = ['T2','T3','T4','T5','T6','T7','CN'];
+const pad = n => String(n).padStart(2,'0');
+const fmtD = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parseD = s => { const p = s.split('-').map(Number); return new Date(p[0],p[1]-1,p[2],12); };
+const addDays = (s,n) => { const d = parseD(s); d.setDate(d.getDate()+n); return fmtD(d); };
+const wdIdx = s => (parseD(s).getDay()+6)%7;
+const mondayOf = s => addDays(s,-wdIdx(s));
+const monthOf = s => s.slice(0,7);
+const sum = (a,f) => a.reduce((x,y)=>x+f(y),0);
+const shortD = s => s.slice(8,10)+'/'+s.slice(5,7);
+
+function defaultState(today){
+  const T = (id,name,icon,kind,min,x) => Object.assign({id,name,icon,kind,min,pts:kind==='bonus'?2:0,noMakeup:false,color:'sun',archived:false},x||{});
+  return {
+    v:1, startDate:today,
+    settings:{kid:'Minh Tuệ',mascot:'Mướp',pin:'1234',dailyMax:10,weekGoal:45,weekBase:50,minRatio:0.6,
+      scoringDays:[0,1,2,3,4],sound:true,
+      reminders:[
+        {t:'06:30',label:'Dậy tập thể dục tăng chiều cao nào!',on:true},
+        {t:'17:30',label:'Đến giờ làm bài tập rồi!',on:true},
+        {t:'20:30',label:'Kiểm tra lại nhiệm vụ hôm nay nhé!',on:true}
+      ]},
+    tasks:[
+      T('tdcc','Tập thể dục tăng chiều cao','🤸','core',10,{color:'sun'}),
+      T('btl','Làm bài tập ở lớp','📒','core',40,{color:'sky',noMakeup:true}),
+      T('toan','Học Toán Timo','🧮','core',40,{color:'grape'}),
+      T('trung','Tiếng Trung (Duolingo / Super Chinese)','🐼','core',20,{color:'coral'}),
+      T('slow','Học Slow Chinese','🎧','core',15,{color:'mint'}),
+      T('shadow','Shadow English','🗣️','core',15,{color:'sky'}),
+      T('kiz','Tiếng Anh KizAZ','📘','core',35,{color:'grape'}),
+      T('piano','Tập đàn Piano','🎹','core',30,{color:'coral'}),
+      T('boi','Bơi lội','🏊','bonus',0,{color:'sky'}),
+      T('pickle','Đánh pickleball','🏓','bonus',0,{color:'mint'}),
+      T('covua','Chơi cờ vua','♟️','bonus',0,{color:'grape'})
+    ],
+    template:{
+      0:['tdcc','btl','toan','trung','slow'],
+      1:['tdcc','btl','kiz','shadow','piano'],
+      2:['tdcc','btl','toan','slow','shadow'],
+      3:['tdcc','btl','trung','kiz','piano'],
+      4:['tdcc','btl','toan','trung','shadow'],
+      5:['tdcc','boi','covua'],
+      6:['tdcc','pickle']
+    },
+    plan:{}, done:{}, makeup:{}, claims:{}, vouchers:[], badges:{}, bestStreak:0, lastBackup:null,
+    rewards:[
+      {id:'r1',name:'Chơi game 15 phút',icon:'🎮',big:false},
+      {id:'r2',name:'Đi cafe cùng bố mẹ',icon:'☕',big:false},
+      {id:'r3',name:'Mua 1 cuốn truyện mới',icon:'📖',big:false},
+      {id:'r4',name:'Đi ăn kem',icon:'🍦',big:false},
+      {id:'r5',name:'Đi đạp vịt',icon:'🦆',big:false},
+      {id:'r6',name:'Đi công viên giải trí',icon:'🎢',big:true},
+      {id:'r7',name:'Chọn một bộ lắp ráp mới',icon:'🧱',big:true},
+      {id:'r8',name:'Cả nhà đi ăn nhà hàng con chọn',icon:'🍕',big:true}
+    ]
+  };
+}
+
+function normalize(o, today){
+  const d = defaultState(today || fmtD(new Date()));
+  const s = Object.assign({}, d, o);
+  s.settings = Object.assign({}, d.settings, o.settings || {});
+  ['tasks','rewards','vouchers'].forEach(k => { if(!Array.isArray(s[k])) s[k] = d[k]; });
+  ['plan','done','makeup','claims','badges','template'].forEach(k => { if(!s[k] || typeof s[k] !== 'object') s[k] = d[k]; });
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s.startDate)) s.startDate = d.startDate;
+  return s;
+}
+
+function validateBackup(obj){
+  if(!obj || obj.app !== APP || !obj.state) return null;
+  const st = obj.state;
+  if(!Array.isArray(st.tasks) || typeof st.plan !== 'object' || typeof st.done !== 'object') return null;
+  return st;
+}
+
+function getPlan(S,date){ return S.plan[date] || S.template[wdIdx(date)] || []; }
+function ensureMaterialized(S,today){
+  let ch = false, d = S.startDate;
+  while(d <= today){
+    if(!S.plan[d]){ S.plan[d] = (S.template[wdIdx(d)] || []).slice(); ch = true; }
+    d = addDays(d,1);
+  }
+  return ch;
+}
+function planTasks(S,date){ return getPlan(S,date).map(id => S.tasks.find(t => t.id === id)).filter(Boolean); }
+
+function allocPoints(core,dailyMax){
+  const out = {}, total = sum(core,t=>t.min);
+  if(!core.length || total <= 0) return out;
+  const units = Math.round(dailyMax*2);
+  const ex = core.map(t => ({id:t.id, v:units*t.min/total}));
+  let used = 0;
+  ex.forEach(e => { e.f = Math.floor(e.v); used += e.f; e.r = e.v - e.f; });
+  let left = units - used;
+  ex.slice().sort((a,b)=>b.r-a.r).forEach(e => { if(left > 0){ e.f++; left--; } });
+  ex.forEach(e => { out[e.id] = e.f/2; });
+  return out;
+}
+
+function dayInfo(S,date,today){
+  const empty = {date,scoring:false,core:[],bonus:[],ratio:null,corePts:0,bonusPts:0,pts:0,max:0,status:'none',perfect:false};
+  if(date < S.startDate) return empty;
+  const tasks = planTasks(S,date);
+  const core = tasks.filter(t => t.kind === 'core'), bonus = tasks.filter(t => t.kind === 'bonus');
+  const scoring = S.settings.scoringDays.includes(wdIdx(date));
+  const alloc = scoring ? allocPoints(core,S.settings.dailyMax) : {};
+  const dn = S.done[date] || {};
+  const items = core.map(t => ({t, done:!!dn[t.id], made:!!S.makeup[date+'|'+t.id], pts:alloc[t.id] || 0}));
+  const totalMin = sum(core,t=>t.min);
+  const doneMin = sum(items.filter(i=>i.done||i.made),i=>i.t.min);
+  const ratio = core.length ? (totalMin > 0 ? doneMin/totalMin : (items.filter(i=>i.done||i.made).length/core.length)) : null;
+  const corePts = sum(items.filter(i=>i.done||i.made),i=>i.pts);
+  const bItems = bonus.map(t => ({t, done:!!dn[t.id], pts:t.pts||0}));
+  const bonusPts = sum(bItems.filter(b=>b.done),b=>b.pts);
+  const status = core.length ? (ratio >= S.settings.minRatio - 1e-9 ? 'ok' : 'miss') : 'none';
+  return {date,scoring,core:items,bonus:bItems,ratio,corePts,bonusPts,pts:corePts+bonusPts,
+    max:(scoring && core.length) ? S.settings.dailyMax : 0, status,
+    perfect: !!core.length && ratio >= 1 - 1e-9};
+}
+
+function streakInfo(S,today){
+  let streak = 0, best = 0, frozen = false;
+  const shields = {}, days = {};
+  let d = S.startDate;
+  while(d < today){
+    const st = dayInfo(S,d,today).status;
+    if(st === 'ok'){ streak++; best = Math.max(best,streak); days[d] = 'ok'; frozen = false; }
+    else if(st === 'miss'){
+      const wk = mondayOf(d);
+      if(!shields[wk]){ shields[wk] = d; days[d] = 'shield'; }
+      else { streak = 0; days[d] = 'freeze'; frozen = true; }
+    } else days[d] = 'none';
+    d = addDays(d,1);
+  }
+  const ti = dayInfo(S,today,today);
+  if(today >= S.startDate){
+    if(ti.status === 'ok'){ streak++; best = Math.max(best,streak); frozen = false; days[today] = 'ok'; }
+    else days[today] = ti.status === 'none' ? 'none' : 'pending';
+  }
+  return {streak,best,frozen,days,shields};
+}
+
+function makeupList(S,today){
+  const out = [];
+  for(let d = mondayOf(today); d < today; d = addDays(d,1)){
+    if(d < S.startDate) continue;
+    dayInfo(S,d,today).core.forEach(it => {
+      if(!it.done && !it.made && !it.t.noMakeup) out.push({date:d,t:it.t,min:it.t.min*2,pts:it.pts});
+    });
+  }
+  return out;
+}
+
+function weekInfo(S,monday,today){
+  const days = [0,1,2,3,4,5,6].map(i => dayInfo(S,addDays(monday,i),today));
+  const total = sum(days,d=>d.pts);
+  const maxPossible = sum(days,d=>d.max);
+  const goal = Math.ceil(maxPossible*S.settings.weekGoal/S.settings.weekBase - 1e-9);
+  const claimOpen = today >= addDays(monday,5);
+  const reached = goal > 0 && total >= goal - 1e-9;
+  return {monday,days,total,maxPossible,goal,claimOpen,reached,claimed:!!S.claims['W:'+monday]};
+}
+
+function weeksOfMonth(ym){
+  let m = mondayOf(ym+'-01'); const out = [];
+  for(let k = 0; k < 7; k++){
+    const thu = monthOf(addDays(m,3));
+    if(thu === ym) out.push(m); else if(thu > ym) break;
+    m = addDays(m,7);
+  }
+  return out;
+}
+function monthInfo(S,ym,today){
+  const ws = weeksOfMonth(ym).map(m => weekInfo(S,m,today));
+  const rel = ws.filter(w => w.maxPossible > 0);
+  const last = ws[ws.length-1];
+  const closed = !!last && today >= addDays(last.monday,5);
+  const allReached = rel.length > 0 && rel.every(w => w.reached);
+  return {ym,weeks:ws,rel,closed,allReached,eligible:allReached && closed,claimed:!!S.claims['M:'+ym]};
+}
+
+function pendingClaims(S,today){
+  const out = [], months = {};
+  for(let m = mondayOf(S.startDate); m <= today; m = addDays(m,7)){
+    const w = weekInfo(S,m,today);
+    if(w.reached && w.claimOpen && !w.claimed) out.push({kind:'week',key:m,label:'Tuần '+shortD(m)+' – '+shortD(addDays(m,6))});
+    months[monthOf(addDays(m,3))] = 1;
+  }
+  Object.keys(months).sort().forEach(ym => {
+    const mi = monthInfo(S,ym,today);
+    if(mi.eligible && !mi.claimed) out.push({kind:'month',key:ym,label:'Cả tháng '+ym.slice(5)+'/'+ym.slice(0,4)});
+  });
+  return out;
+}
+
+function computeStats(S,today){
+  let totalPts = 0, perfect = 0, bonusDone = 0, d = S.startDate;
+  while(d <= today){
+    const i = dayInfo(S,d,today);
+    totalPts += i.pts;
+    if(i.perfect && i.max > 0) perfect++;
+    bonusDone += i.bonus.filter(b=>b.done).length;
+    d = addDays(d,1);
+  }
+  let weeksWon = 0;
+  for(let m = mondayOf(S.startDate); m <= today; m = addDays(m,7)){
+    const w = weekInfo(S,m,today);
+    if(w.reached && w.claimOpen) weeksWon++;
+  }
+  const st = streakInfo(S,today);
+  return {totalPts,perfect,bonusDone,weeksWon,streak:st.streak,
+    best:Math.max(st.best,S.bestStreak||0),makeups:Object.keys(S.makeup).length,
+    rewards:S.vouchers.length,months:Object.keys(S.claims).filter(k=>k[0]==='M').length};
+}
+
+const BADGES = [
+  {id:'s3',name:'Khởi động',desc:'Streak 3 ngày',icon:'🔥',c:'sun',t:s=>s.best>=3},
+  {id:'s7',name:'Tuần lửa',desc:'Streak 7 ngày',icon:'🏅',c:'coral',t:s=>s.best>=7},
+  {id:'s14',name:'Bền bỉ',desc:'Streak 14 ngày',icon:'🥈',c:'sky',t:s=>s.best>=14},
+  {id:'s30',name:'Cúp Vàng',desc:'Streak 30 ngày',icon:'🏆',c:'sun',t:s=>s.best>=30},
+  {id:'s60',name:'Siêu kiên trì',desc:'Streak 60 ngày',icon:'💎',c:'sky',t:s=>s.best>=60},
+  {id:'s100',name:'Huyền thoại',desc:'Streak 100 ngày',icon:'👑',c:'grape',t:s=>s.best>=100},
+  {id:'p1',name:'Ngày hoàn hảo',desc:'Làm đủ mọi nhiệm vụ trong một ngày',icon:'⭐',c:'sun',t:s=>s.perfect>=1},
+  {id:'p5',name:'Năm ngôi sao',desc:'5 ngày hoàn hảo',icon:'🌟',c:'sun',t:s=>s.perfect>=5},
+  {id:'p20',name:'Ngôi sao sáng',desc:'20 ngày hoàn hảo',icon:'✨',c:'grape',t:s=>s.perfect>=20},
+  {id:'w1',name:'Tuần đạt chuẩn',desc:'Đạt mục tiêu điểm của một tuần',icon:'🎯',c:'mint',t:s=>s.weeksWon>=1},
+  {id:'w4',name:'Bốn tuần liền',desc:'4 tuần đạt mục tiêu',icon:'🚀',c:'coral',t:s=>s.weeksWon>=4},
+  {id:'w12',name:'Một quý chăm chỉ',desc:'12 tuần đạt mục tiêu',icon:'🌈',c:'grape',t:s=>s.weeksWon>=12},
+  {id:'t100',name:'Trăm điểm',desc:'Tích lũy 100 điểm',icon:'💯',c:'mint',t:s=>s.totalPts>=100},
+  {id:'t500',name:'Năm trăm điểm',desc:'Tích lũy 500 điểm',icon:'🧠',c:'sky',t:s=>s.totalPts>=500},
+  {id:'t1000',name:'Nghìn điểm',desc:'Tích lũy 1000 điểm',icon:'🦄',c:'grape',t:s=>s.totalPts>=1000},
+  {id:'b5',name:'Vận động viên',desc:'Hoàn thành 5 hoạt động thưởng thêm',icon:'🏊',c:'sky',t:s=>s.bonusDone>=5},
+  {id:'mk1',name:'Dũng cảm bù bài',desc:'Học bù một bài đã bỏ lỡ',icon:'💪',c:'coral',t:s=>s.makeups>=1},
+  {id:'r1',name:'Quà đầu tiên',desc:'Nhận phần thưởng đầu tiên',icon:'🎁',c:'mint',t:s=>s.rewards>=1},
+  {id:'m1',name:'Cúp cả tháng',desc:'Đạt mục tiêu tất cả các tuần trong tháng',icon:'🎖️',c:'sun',t:s=>s.months>=1}
+];
+function checkBadges(S,today){
+  const st = computeStats(S,today), fresh = [];
+  S.bestStreak = st.best;
+  BADGES.forEach(b => { if(!S.badges[b.id] && b.t(st)){ S.badges[b.id] = today; fresh.push(b.id); } });
+  return fresh;
+}
+
+function buildICS(S,today){
+  const stamp = today.replace(/-/g,'');
+  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nhiem Vu cua Minh Tue//VI','CALSCALE:GREGORIAN'];
+  S.settings.reminders.filter(r=>r.on && /^\d{2}:\d{2}$/.test(r.t)).forEach((r,i) => {
+    L.push('BEGIN:VEVENT','UID:nvmt-'+i+'-'+stamp+'@local','DTSTAMP:'+stamp+'T000000',
+      'DTSTART:'+stamp+'T'+r.t.replace(':','')+'00','DURATION:PT15M','RRULE:FREQ=DAILY',
+      'SUMMARY:'+r.label.replace(/[\r\n,;]/g,' '),
+      'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:'+r.label.replace(/[\r\n,;]/g,' '),'END:VALARM','END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.join('\r\n');
+}
+// ==/LOGIC==
+
+// ==UI==
+const KEY = 'nvmt_v1';
+let TODAY = fmtD(new Date());
+let S = null, storageOK = true;
+const ui = {tab:'today',parent:false,ptab:'plan',pin:null,modal:null,planWeek:mondayOf(TODAY),calMonth:monthOf(TODAY),
+  calSel:null,selTask:null,fixDate:TODAY,banner:null,toast:null,badgeQueue:[],confirmReset:false,backupText:'',pendingImport:null,icsText:''};
+
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fp = n => (Math.round(n*10)/10).toString().replace('.',',');
+const taskById = id => S.tasks.find(t=>t.id===id);
+const rewardById = id => S.rewards.find(r=>r.id===id);
+
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw) return normalize(JSON.parse(raw),TODAY); }catch(e){}
+  return null;
+}
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); storageOK = true; }catch(e){ storageOK = false; }
+}
+function toast(msg){
+  ui.toast = msg; render();
+  clearTimeout(toast.t); toast.t = setTimeout(()=>{ ui.toast = null; render(); },2400);
+}
+
+/* sound and confetti */
+let audioCtx = null;
+function tone(freqs,dur){
+  if(!S.settings.sound) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = audioCtx.currentTime;
+    freqs.forEach((f,i)=>{
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001,t0+i*dur); g.gain.exponentialRampToValueAtTime(0.25,t0+i*dur+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+i*dur+dur);
+      o.connect(g); g.connect(audioCtx.destination); o.start(t0+i*dur); o.stop(t0+i*dur+dur+0.05);
+    });
+  }catch(e){}
+}
+const ting = () => tone([880,1320],0.12);
+const fanfare = () => tone([523,659,784,1047],0.16);
+function burst(big){
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = document.getElementById('fx'); if(!cv) return;
+  const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W*dpr; cv.height = H*dpr;
+  const ctx = cv.getContext('2d'); ctx.scale(dpr,dpr);
+  const cols = ['#FFB020','#1FBF85','#FF6459','#2E9BFF','#6B4DF5','#FF8FD0'];
+  const n = big ? 150 : 60;
+  const ps = Array.from({length:n},()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*(big?16:10),vy:-Math.random()*(big?16:11)-3,
+    r:4+Math.random()*5,c:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6,va:(Math.random()-.5)*.4}));
+  let f = 0;
+  (function step(){
+    ctx.clearRect(0,0,W,H);
+    ps.forEach(p=>{ p.vy += .38; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r); ctx.restore(); });
+    if(++f < 110) requestAnimationFrame(step); else ctx.clearRect(0,0,W,H);
+  })();
+}
+
+/* svg bits */
+const ICON = {
+  today:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
+  week:'<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  cal:'<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  badge:'<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>',
+  gift:'<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M12 10v10M4 14h16M12 10C9 10 8 5 11 5s1 5 1 5zM12 10c3 0 4-5 1-5s-1 5-1 5z"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
+};
+const svgI = k => '<svg viewBox="0 0 24 24" aria-hidden="true">'+ICON[k]+'</svg>';
+function flame(frozen){
+  const a = frozen ? 'var(--ice)' : 'var(--sun)', b = frozen ? 'var(--sky)' : 'var(--coral)';
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-2.2 1-3.4 2.3-4.6.2 2 1 3 2.2 3.3C10.300 7.600 10.500 5 12 2z" fill="'+b+'"/><path d="M12 11c.8 1.800 2.500 2.600 2.500 4.500a2.500 2.500 0 0 1-5 0c0-1.200.7-1.900 1.400-2.500.2.900.6 1.300 1.100 1.500-.2-1.400-.2-2.500 0-3.500z" fill="'+a+'"/></svg>';
+}
+function mascot(mood){
+  const ink = 'stroke="var(--ink)" stroke-width="3" stroke-linecap="round" fill="none"';
+  let eyes, mouth, extra = '';
+  if(mood === 'sad'){
+    eyes = '<circle cx="36" cy="52" r="4.500" fill="var(--ink)"/><circle cx="64" cy="52" r="4.500" fill="var(--ink)"/><path d="M29 44l11 3M71 44l-11 3" '+ink+'/>';
+    mouth = '<path d="M43 71q7-6 14 0" '+ink+'/>';
+    extra = '<path d="M68 58q3 5 0 8q-3-3 0-8z" fill="var(--sky)"/>';
+  } else if(mood === 'cheer'){
+    eyes = '<path d="M30 54q6-9 12 0M58 54q6-9 12 0" '+ink+'/>';
+    mouth = '<path d="M41 64q9 14 18 0z" fill="var(--ink)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M46 70q4 4 8 0" fill="none" stroke="var(--coral)" stroke-width="3" stroke-linecap="round"/>';
+  } else {
+    eyes = '<circle cx="36" cy="52" r="5" fill="var(--ink)"/><circle cx="64" cy="52" r="5" fill="var(--ink)"/><circle cx="37.500" cy="50.500" r="1.600" fill="#fff"/><circle cx="65.500" cy="50.500" r="1.600" fill="#fff"/>';
+    mouth = '<path d="M43 65q3.500 5 7 0q3.500 5 7 0" '+ink+'/>';
+  }
+  return '<svg class="mascot '+(mood==='cheer'?'cheer':'')+'" viewBox="0 0 100 100" role="img" aria-label="Linh vật">'+
+    '<path d="M16 42L22 10l26 18z" fill="var(--sun)"/><path d="M84 42L78 10 52 28z" fill="var(--sun)"/>'+
+    '<path d="M24 34l3-13 11 8z" fill="var(--coral)"/><path d="M76 34l-3-13-11 8z" fill="var(--coral)"/>'+
+    '<ellipse cx="50" cy="58" rx="37" ry="33" fill="var(--sun)"/>'+
+    '<circle cx="27" cy="65" r="6.500" fill="var(--coral)" opacity=".5"/><circle cx="73" cy="65" r="6.500" fill="var(--coral)" opacity=".5"/>'+
+    eyes+'<path d="M46 59h8l-4 4.500z" fill="var(--ink)"/>'+mouth+extra+
+    '<path d="M14 58l10 2M14 66l10-2M86 58l-10 2M86 66l-10-2" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" opacity=".55"/></svg>';
+}
+
+/* mascot speech */
+function mascotLine(info,st){
+  const kid = S.settings.kid;
+  const left = info.core.filter(i=>!(i.done||i.made)).length;
+  const doneN = info.core.length - left;
+  const h = new Date().getHours();
+  const part = h < 11 ? 'sáng' : h < 14 ? 'trưa' : h < 18 ? 'chiều' : 'tối';
+  if(st.frozen && info.status !== 'ok') return {mood:'sad',text:'Streak đang bị đóng băng. Hoàn thành hôm nay để bắt đầu lại nhé, '+kid+' ơi!'};
+  if(!info.core.length && !info.bonus.length) return {mood:'happy',text:'Hôm nay chưa có nhiệm vụ. Nghỉ ngơi vui vẻ nhé!'};
+  if(info.perfect) return {mood:'cheer',text:'Tuyệt vời! '+kid+' đã làm đủ mọi nhiệm vụ hôm nay!'};
+  if(info.status === 'ok') return {mood:'happy',text:'Đã đủ để giữ streak rồi! Còn '+left+' nhiệm vụ nữa là hoàn hảo.'};
+  if(doneN === 0) return {mood:'happy',text:'Chào buổi '+part+', '+kid+'! Hôm nay có '+info.core.length+' nhiệm vụ. Bắt đầu nào!'};
+  return {mood:'happy',text:'Giỏi lắm! Còn '+left+' nhiệm vụ nữa thôi.'};
+}
+
+/* persistence helpers */
+function afterChange(){
+  const fresh = checkBadges(S,TODAY);
+  if(fresh.length){ ui.badgeQueue.push(...fresh); if(!ui.modal) openNextBadge(); }
+  save();
+}
+function openNextBadge(){
+  const id = ui.badgeQueue.shift();
+  if(id){ ui.modal = {type:'badge',id}; fanfare(); burst(true); }
+}
+
+/* actions on tasks */
+function tickToday(id){
+  const before = dayInfo(S,TODAY,TODAY);
+  S.done[TODAY] = S.done[TODAY] || {};
+  const now = !S.done[TODAY][id];
+  if(now) S.done[TODAY][id] = true; else delete S.done[TODAY][id];
+  const after = dayInfo(S,TODAY,TODAY);
+  if(now){
+    if(after.perfect && !before.perfect){ fanfare(); burst(true); }
+    else { ting(); burst(false); }
+  }
+  afterChange(); render();
+}
+function tickMakeup(date,id){
+  const k = date+'|'+id;
+  if(S.makeup[k]){ if(S.makeup[k] === TODAY) delete S.makeup[k]; }
+  else { S.makeup[k] = TODAY; ting(); burst(false); }
+  afterChange(); render();
+}
+
+/* planner */
+function editablePlan(date){ return (S.plan[date] || S.template[wdIdx(date)] || []).slice(); }
+function movePlan(payload,toDate,toIndex){
+  if(toDate < TODAY) return toast('Không sửa được ngày đã qua');
+  let id, idx = toIndex;
+  if(payload.indexOf('lib:') === 0){
+    id = payload.slice(4);
+    if(editablePlan(toDate).includes(id)) return toast('Ngày này đã có nhiệm vụ đó');
+  } else {
+    const p = payload.split(':'), from = p[1], i = +p[2];
+    if(from < TODAY) return;
+    const arr = editablePlan(from); id = arr.splice(i,1)[0]; S.plan[from] = arr;
+    if(from === toDate && idx != null && i < idx) idx--;
+  }
+  const to = editablePlan(toDate);
+  if(!taskById(id)) return;
+  if(to.includes(id)) return;
+  to.splice(idx == null ? to.length : idx,0,id);
+  S.plan[toDate] = to; save(); render();
+}
+
+/* backup */
+function exportObj(){ return {app:APP,version:1,exportedAt:new Date().toISOString(),state:S}; }
+async function saveFile(name,text,mime){
+  try{
+    const dl = (window.claude && claude.use) ? await claude.use('downloads') : null;
+    if(dl){ await dl.save({filename:name,data:text}); return 'saved'; }
+  }catch(e){ if(e && e.code === 'declined') return 'declined'; }
+  try{
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text],{type:mime})); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); return 'anchor';
+  }catch(e){}
+  return 'none';
+}
+
+/* ---------- rendering ---------- */
+function ring(frac,big,label){
+  const C = 2*Math.PI*42, f = Math.max(0,Math.min(1,frac));
+  return '<div class="ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="var(--surface2)" stroke-width="12"/>'+
+    '<circle cx="50" cy="50" r="42" fill="none" stroke="var(--mint)" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+(f*C).toFixed(1)+' '+C.toFixed(1)+'"/></svg>'+
+    '<div class="c"><div><b class="num">'+big+'</b><br><span>'+label+'</span></div></div></div>';
+}
+function taskRow(it,kind,opts){
+  const t = it.t, done = it.done || it.made;
+  const sub = kind === 'bonus' ? '<span class="tag bonus">+'+fp(it.pts)+' điểm thưởng</span>'
+    : '<span>'+(opts && opts.min ? opts.min : t.min)+' phút'+(it.pts ? ' · +'+fp(it.pts)+' điểm' : '')+'</span>';
+  const act = opts && opts.make ? 'tickMk' : 'tick';
+  return '<button class="task c-'+t.color+(done?' done':'')+(opts&&opts.make?' mk':'')+'" data-act="'+act+'" data-id="'+t.id+'"'+(opts&&opts.date?' data-date="'+opts.date+'"':'')+' aria-pressed="'+done+'">'+
+    '<span class="ic" aria-hidden="true">'+t.icon+'</span><span class="tx"><b>'+esc(t.name)+'</b>'+sub+'</span>'+
+    '<span class="chk" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.500" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7"/></svg></span></button>';
+}
+
+function viewToday(){
+  const info = dayInfo(S,TODAY,TODAY), st = streakInfo(S,TODAY), mk = makeupList(S,TODAY);
+  const pend = pendingClaims(S,TODAY);
+  let h = '';
+  if(pend.length) h += '<div class="banner"><span class="grow">Con có '+pend.length+' phần thưởng đang chờ chọn!</span><button class="btn mint" data-act="tab" data-tab="rewards">Chọn quà</button></div>';
+  const frac = info.max ? info.corePts/info.max : (info.ratio || 0);
+  const big = info.max ? fp(info.corePts) : (info.core.length ? Math.round((info.ratio||0)*100)+'%' : '–');
+  const lab = info.max ? 'trên '+info.max+' điểm' : 'hoàn thành';
+  const tot = sum(info.core,i=>i.t.min);
+  h += '<section class="card sum">'+ring(frac,big,lab)+'<div class="grow"><h2>'+WD[wdIdx(TODAY)]+', '+shortD(TODAY)+'</h2>'+
+    '<p class="muted">'+(info.core.length ? info.core.length+' nhiệm vụ · '+tot+' phút' : 'Không có nhiệm vụ chính')+
+    (info.scoring ? '' : ' · ngày này chỉ giữ streak')+'</p>'+
+    (info.bonusPts ? '<p><span class="tag bonus">+'+fp(info.bonusPts)+' điểm thưởng thêm</span></p>' : '')+
+    '</div></section>';
+  if(info.core.length){
+    h += '<div class="sec"><h2>Nhiệm vụ hôm nay</h2><span class="muted small">Chạm để tick</span></div><div class="tasks">'+info.core.map(i=>taskRow(i,'core')).join('')+'</div>';
+  }
+  if(info.bonus.length){
+    h += '<div class="sec"><h2>Thưởng thêm</h2><span class="muted small">Làm thêm để cộng điểm</span></div><div class="tasks">'+info.bonus.map(i=>taskRow(i,'bonus')).join('')+'</div>';
+  }
+  if(mk.length){
+    const daysLeft = 6 - wdIdx(TODAY);
+    h += '<div class="sec"><h2>Học bù</h2><span class="muted small">Gấp đôi thời gian · hết hạn Chủ Nhật'+(daysLeft?' (còn '+daysLeft+' ngày)':' (hôm nay)')+'</span></div><div class="tasks">'+
+      mk.map(m=>taskRow({t:m.t,done:false,made:false,pts:m.pts},'core',{make:true,date:m.date,min:m.min})).join('')+'</div>';
+  }
+  const madeToday = [];
+  Object.keys(S.makeup).forEach(k => { if(S.makeup[k] === TODAY){ const p = k.split('|'); const t = taskById(p[1]); if(t) madeToday.push({date:p[0],t}); } });
+  if(madeToday.length){
+    h += '<div class="sec"><h2>Đã bù hôm nay</h2></div><div class="tasks">'+madeToday.map(m=>taskRow({t:m.t,done:true,made:true,pts:0},'core',{make:true,date:m.date,min:m.t.min*2})).join('')+'</div>';
+  }
+  if(!info.core.length && !info.bonus.length && !mk.length){
+    h += '<div class="card empty">Hôm nay chưa có nhiệm vụ nào. Nhờ bố mẹ thêm trong khu phụ huynh nhé.</div>';
+  }
+  return h;
+}
+
+function dayChart(w){
+  const mx = Math.max(S.settings.dailyMax+2, ...w.days.map(d=>d.pts)), H = 150, base = 175;
+  let g = '';
+  [0,Math.round(S.settings.dailyMax/2),S.settings.dailyMax].forEach(v=>{
+    const y = base - v/mx*H;
+    g += '<line class="grid" x1="30" x2="548" y1="'+y+'" y2="'+y+'"/><text x="24" y="'+(y+4)+'" text-anchor="end">'+v+'</text>';
+  });
+  w.days.forEach((d,i)=>{
+    const x = 44+i*74, hh = Math.max(d.pts/mx*H,d.pts?4:0), fut = d.date > TODAY;
+    const col = fut ? 'var(--line)' : d.status === 'ok' ? 'var(--mint)' : d.status === 'miss' ? 'var(--coral)' : d.pts ? 'var(--sun)' : 'var(--line)';
+    g += '<rect x="'+x+'" y="'+(base-hh)+'" width="48" height="'+hh+'" rx="8" fill="'+col+'"/>'+
+      (d.pts ? '<text class="val" x="'+(x+24)+'" y="'+(base-hh-6)+'" text-anchor="middle">'+fp(d.pts)+'</text>' : '')+
+      '<text x="'+(x+24)+'" y="195" text-anchor="middle">'+WS[i]+' '+shortD(d.date).slice(0,2)+'</text>';
+  });
+  return '<svg class="chart" viewBox="0 0 560 204" role="img" aria-label="Điểm theo ngày trong tuần">'+g+'</svg>';
+}
+
+function viewWeek(){
+  const mon = mondayOf(TODAY), w = weekInfo(S,mon,TODAY), st = streakInfo(S,TODAY), stats = computeStats(S,TODAY);
+  const frac = w.goal ? Math.min(1,w.total/w.goal) : 0;
+  let h = '<section class="card"><div class="sec"><h2>Tuần này ('+shortD(mon)+' – '+shortD(addDays(mon,6))+')</h2></div>'+
+    '<div class="row" style="margin:10px 0 6px"><b class="num" style="font-family:var(--font-display);font-size:34px">'+fp(w.total)+'</b><span class="muted">/ mục tiêu '+w.goal+' điểm (tối đa '+w.maxPossible+')</span></div>'+
+    '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="'+w.goal+'" aria-valuenow="'+Math.round(w.total)+'"><i style="width:'+(frac*100)+'%"></i></div>';
+  if(w.claimed) h += '<p style="margin-top:10px"><span class="tag" style="--ts:var(--mint-soft)">Đã nhận thưởng tuần này</span></p>';
+  else if(w.reached && w.claimOpen) h += '<div style="margin-top:12px"><button class="btn mint" data-act="claim" data-kind="week" data-key="'+mon+'">Chọn phần thưởng tuần</button></div>';
+  else if(w.reached) h += '<p style="margin-top:10px" class="muted">Đã đủ điểm! Phần thưởng mở vào thứ Bảy.</p>';
+  else h += '<p style="margin-top:10px" class="muted">Còn thiếu '+fp(Math.max(0,w.goal-w.total))+' điểm để nhận thưởng cuối tuần.</p>';
+  h += '</section>';
+  h += '<section class="card"><h3 style="margin-bottom:8px">Điểm từng ngày</h3>'+dayChart(w)+'</section>';
+  const shieldDay = st.shields[mon];
+  h += '<section class="card"><div class="stats">'+
+    '<div class="stat"><b>'+st.streak+'</b><span>Streak hiện tại'+(st.frozen?' (đóng băng)':'')+'</span></div>'+
+    '<div class="stat"><b>'+stats.best+'</b><span>Streak dài nhất</span></div>'+
+    '<div class="stat"><b>'+fp(stats.totalPts)+'</b><span>Tổng điểm tích lũy</span></div>'+
+    '<div class="stat"><b>'+(shieldDay ? '0/1' : '1/1')+'</b><span>Băng bảo vệ tuần này'+(shieldDay?' (đã dùng ngày '+shortD(shieldDay)+')':'')+'</span></div></div></section>';
+  const rows = [];
+  for(let m = mon, k = 0; k < 8 && m >= mondayOf(S.startDate); m = addDays(m,-7), k++){
+    const x = weekInfo(S,m,TODAY);
+    rows.push('<tr><td>'+shortD(m)+' – '+shortD(addDays(m,6))+'</td><td class="num">'+fp(x.total)+' / '+x.goal+'</td><td>'+
+      (x.goal===0?'–':x.reached ? (x.claimOpen?'Đạt':'Đang đạt') : (x.claimOpen?'Chưa đạt':'Đang làm'))+'</td></tr>');
+  }
+  h += '<section class="card"><h3 style="margin-bottom:6px">Các tuần gần đây</h3><div class="scroll"><table class="tbl"><thead><tr><th>Tuần</th><th>Điểm</th><th>Kết quả</th></tr></thead><tbody>'+rows.join('')+'</tbody></table></div></section>';
+  return h;
+}
+
+function monthChart(mi){
+  const ws = mi.weeks; if(!ws.length) return '';
+  const mx = Math.max(10, ...ws.map(w=>Math.max(w.total,w.goal,w.maxPossible))), H = 130, base = 150, n = ws.length, bw = Math.min(70,440/n-12);
+  let g = '', goalY = null;
+  [0,Math.round(mx/2),mx].forEach(v=>{ const y = base-v/mx*H; g += '<line class="grid" x1="36" x2="548" y1="'+y+'" y2="'+y+'"/><text x="30" y="'+(y+4)+'" text-anchor="end">'+v+'</text>'; });
+  ws.forEach((w,i)=>{
+    const slot = 500/n, x = 44+i*slot+(slot-bw)/2, hh = Math.max(w.total/mx*H,w.total?4:0);
+    const col = w.maxPossible===0 ? 'var(--line)' : w.reached ? 'var(--mint)' : (w.claimOpen ? 'var(--coral)' : 'var(--sun)');
+    g += '<rect x="'+x+'" y="'+(base-hh)+'" width="'+bw+'" height="'+hh+'" rx="8" fill="'+col+'"/>'+
+      (w.total ? '<text class="val" x="'+(x+bw/2)+'" y="'+(base-hh-6)+'" text-anchor="middle">'+fp(w.total)+'</text>' : '')+
+      '<text x="'+(x+bw/2)+'" y="170" text-anchor="middle">'+shortD(w.monday)+'</text>';
+    if(w.goal){ const y = base-w.goal/mx*H; g += '<line class="goal" x1="'+(x-4)+'" x2="'+(x+bw+4)+'" y1="'+y+'" y2="'+y+'"/>'; }
+  });
+  return '<svg class="chart" viewBox="0 0 560 180" role="img" aria-label="Điểm từng tuần trong tháng">'+g+'</svg>';
+}
+
+function viewCal(){
+  const ym = ui.calMonth, st = streakInfo(S,TODAY), mi = monthInfo(S,ym,TODAY);
+  const first = ym+'-01', lead = wdIdx(first);
+  const dim = new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate();
+  let cells = WS.map(x=>'<div class="h">'+x+'</div>').join('');
+  for(let i = 0; i < lead; i++) cells += '<div class="day void"></div>';
+  for(let d = 1; d <= dim; d++){
+    const ds = ym+'-'+pad(d), i = dayInfo(S,ds,TODAY);
+    let cls = 'future', sub = '';
+    if(ds < S.startDate) cls = 'none';
+    else if(ds > TODAY) cls = i.core.length||i.bonus.length ? 'future' : 'none';
+    else {
+      const s2 = st.days[ds];
+      if(s2 === 'ok') cls = i.perfect ? 'ok' : 'part';
+      else if(s2 === 'shield') cls = 'shield'; else if(s2 === 'freeze') cls = 'freeze';
+      else if(s2 === 'pending') cls = 'part'; else cls = 'none';
+      if(i.max) sub = '<small>'+fp(i.pts)+'</small>'; else if(i.pts) sub = '<small>+'+fp(i.pts)+'</small>';
+    }
+    cells += '<button class="day '+cls+(ds===TODAY?' today':'')+(ui.calSel===ds?' sel':'')+'" data-act="calDay" data-date="'+ds+'" aria-label="Ngày '+d+'">'+d+sub+'</button>';
+  }
+  const label = 'Tháng '+ym.slice(5)+'/'+ym.slice(0,4);
+  let h = '<section class="card"><div class="row" style="justify-content:space-between"><button class="btn ghost small" data-act="calPrev" aria-label="Tháng trước">‹ Trước</button><h2>'+label+'</h2><button class="btn ghost small" data-act="calNext" aria-label="Tháng sau">Sau ›</button></div>'+
+    '<div class="cal" style="margin-top:12px">'+cells+'</div>'+
+    '<div class="legend" style="margin-top:12px"><span><i style="background:var(--mint)"></i>Hoàn hảo</span><span><i style="background:var(--sun)"></i>Đạt streak</span><span><i style="background:var(--sky)"></i>Băng bảo vệ</span><span><i style="background:var(--coral)"></i>Bỏ lỡ</span></div></section>';
+  if(ui.calSel){
+    const i = dayInfo(S,ui.calSel,TODAY), all = i.core.concat(i.bonus);
+    h += '<section class="card"><h3>'+WD[wdIdx(ui.calSel)]+', '+shortD(ui.calSel)+'</h3>'+
+      (all.length ? '<div class="list" style="margin-top:10px">'+all.map(x=>'<div class="li"><span class="ic">'+x.t.icon+'</span><span class="grow">'+esc(x.t.name)+'</span><span class="tag '+((x.done||x.made)?'':'coral')+'" style="--ts:var(--mint-soft)">'+((x.done||x.made)?(x.made&&!x.done?'Đã bù':'Xong'):(ui.calSel>TODAY?'Sắp tới':'Chưa làm'))+'</span></div>').join('')+'</div>'+
+        '<p class="muted" style="margin-top:8px">Điểm ngày: <b class="num">'+fp(i.pts)+'</b>'+(i.max?' / '+i.max:'')+'</p>' : '<p class="muted" style="margin-top:8px">Không có nhiệm vụ.</p>')+'</section>';
+  }
+  h += '<section class="card"><h3 style="margin-bottom:6px">Điểm từng tuần trong tháng</h3>'+monthChart(mi)+
+    '<p class="legend" style="margin-top:6px"><span><i style="background:var(--coral);height:3px;margin-top:5px"></i>Vạch đỏ nét đứt là mục tiêu tuần</span></p>';
+  if(mi.claimed) h += '<p style="margin-top:10px"><span class="tag" style="--ts:var(--mint-soft)">Đã nhận thưởng tháng</span></p>';
+  else if(mi.eligible) h += '<div style="margin-top:12px"><button class="btn sun" data-act="claim" data-kind="month" data-key="'+ym+'">Chọn thưởng cả tháng</button></div>';
+  else {
+    const got = mi.rel.filter(w=>w.reached).length;
+    h += '<p class="muted" style="margin-top:10px">Thưởng lớn cả tháng: đã đạt '+got+'/'+mi.rel.length+' tuần'+(mi.rel.length?'':' (chưa có tuần nào)')+'. Cần đạt tất cả các tuần trong tháng.</p>';
+  }
+  return h+'</section>';
+}
+
+function viewBadges(){
+  const have = BADGES.filter(b=>S.badges[b.id]).length;
+  let h = '<div class="sec"><h2>Huy hiệu và cúp</h2><span class="muted small">'+have+'/'+BADGES.length+' đã mở</span></div><div class="bgrid">';
+  BADGES.forEach(b=>{
+    const got = S.badges[b.id];
+    h += '<div class="badge c-'+b.c+(got?'':' locked')+'"><div class="med" aria-hidden="true">'+b.icon+'</div><b>'+b.name+'</b><span>'+b.desc+'</span>'+(got?'<span class="tag" style="--ts:var(--mint-soft)">Mở ngày '+shortD(got)+'</span>':'<span>Chưa mở</span>')+'</div>';
+  });
+  return h+'</div>';
+}
+
+function viewRewards(){
+  const pend = pendingClaims(S,TODAY);
+  let h = '';
+  pend.forEach(p=>{
+    h += '<div class="banner"><span class="grow">'+(p.kind==='month'?'Thưởng lớn: ':'Thưởng tuần: ')+esc(p.label)+'</span><button class="btn mint" data-act="claim" data-kind="'+p.kind+'" data-key="'+p.key+'">Chọn quà</button></div>';
+  });
+  const open = S.vouchers.filter(v=>!v.used), used = S.vouchers.filter(v=>v.used);
+  h += '<div class="sec"><h2>Quà con đã nhận</h2><span class="muted small">Bố mẹ xác nhận khi dùng</span></div>';
+  if(!open.length) h += '<div class="card empty">Chưa có quà nào đang chờ. Đạt '+S.settings.weekGoal+' điểm trong tuần để nhận quà nhé!</div>';
+  else h += '<div class="list">'+open.map(v=>'<div class="card row c-'+(v.big?'sun':'mint')+'"><span style="font-size:36px">'+v.icon+'</span><div class="grow"><b>'+esc(v.name)+'</b><div class="muted small">'+(v.kind==='month'?'Thưởng tháng':'Thưởng tuần')+' · nhận ngày '+shortD(v.earnedAt)+'</div></div><button class="btn small" data-act="useVoucher" data-id="'+v.id+'">Dùng quà</button></div>').join('')+'</div>';
+  h += '<div class="sec"><h2>Danh sách phần thưởng</h2></div><div class="card"><div class="list">'+
+    S.rewards.map(r=>'<div class="li"><span class="ic">'+r.icon+'</span><span class="grow">'+esc(r.name)+'</span>'+(r.big?'<span class="tag bonus">Thưởng lớn</span>':'')+'</div>').join('')+'</div>'+
+    '<p class="muted small" style="margin-top:10px">Thưởng tuần: chọn 1 quà thường. Thưởng cả tháng: chọn 1 quà lớn hoặc 2 quà thường cùng lúc.</p></div>';
+  if(used.length) h += '<div class="sec"><h3>Đã dùng</h3></div><div class="list">'+used.slice().reverse().map(v=>'<div class="li"><span class="ic">'+v.icon+'</span><span class="grow">'+esc(v.name)+'</span><span class="muted small">ngày '+shortD(v.usedAt)+'</span></div>').join('')+'</div>';
+  return h;
+}
+
+function header(){
+  const info = dayInfo(S,TODAY,TODAY), st = streakInfo(S,TODAY), ml = mascotLine(info,st);
+  const shieldFree = !st.shields[mondayOf(TODAY)];
+  return '<header class="card hero">'+mascot(ml.mood)+
+    '<div class="grow"><h1>Nhiệm Vụ của '+esc(S.settings.kid)+'</h1><p class="say">'+esc(S.settings.mascot)+': '+esc(ml.text)+'</p></div>'+
+    '<div class="row"><span class="pill'+(st.frozen&&info.status!=='ok'?' ice':'')+'" title="Streak">'+flame(st.frozen&&info.status!=='ok')+'<span class="num">'+st.streak+'</span></span>'+
+    '<span class="pill shield" title="Băng bảo vệ tuần này">Băng '+(shieldFree?'1':'0')+'/1</span>'+
+    '<button class="lockbtn" data-act="openPin" aria-label="Khu phụ huynh">'+svgI('lock')+'</button></div></header>';
+}
+function tabbar(){
+  const pend = pendingClaims(S,TODAY).length;
+  const tabs = [['today','Hôm nay','today'],['week','Tuần','week'],['cal','Lịch','cal'],['badges','Huy hiệu','badge'],['rewards','Quà','gift']];
+  return '<div class="tabbar"><nav>'+tabs.map(t=>'<button class="tab'+(ui.tab===t[0]?' on':'')+'" data-act="tab" data-tab="'+t[0]+'">'+svgI(t[2])+t[1]+(t[0]==='rewards'&&pend?'<span class="dot"></span>':'')+'</button>').join('')+'</nav></div>';
+}
+
+/* ---------- parent area ---------- */
+function viewPlan(){
+  const mon = ui.planWeek, canPrev = mon > mondayOf(TODAY);
+  const lib = S.tasks.filter(t=>!t.archived);
+  let h = '<section class="card"><div class="row" style="justify-content:space-between"><button class="btn ghost small" data-act="planPrev"'+(canPrev?'':' disabled')+'>‹ Tuần trước</button>'+
+    '<h3>Tuần '+shortD(mon)+' – '+shortD(addDays(mon,6))+'</h3><button class="btn ghost small" data-act="planNext">Tuần sau ›</button></div>'+
+    '<p class="muted small" style="margin-top:8px">Kéo nhiệm vụ vào ngày, hoặc chạm một nhiệm vụ rồi chạm “Thêm vào đây” ở ngày muốn thêm. Kéo giữa các ngày để chuyển.</p></section>';
+  h += '<section class="card"><h3 style="margin-bottom:8px">Kho nhiệm vụ</h3><div class="lib">'+
+    lib.map(t=>'<div class="chip c-'+t.color+(t.kind==='bonus'?' bonus':'')+(ui.selTask===t.id?' sel':'')+'" draggable="true" data-drag="lib:'+t.id+'" data-act="planSel" data-id="'+t.id+'" role="button" tabindex="0">'+t.icon+' <span class="nm">'+esc(t.name)+'</span><em>'+(t.kind==='bonus'?'+'+t.pts+'đ':t.min+"'")+'</em></div>').join('')+'</div></section>';
+  h += '<div class="pgrid">';
+  for(let i = 0; i < 7; i++){
+    const ds = addDays(mon,i), lock = ds < TODAY, ids = editablePlan(ds);
+    const tasks = ids.map(id=>taskById(id)).filter(Boolean);
+    const min = sum(tasks.filter(t=>t.kind==='core'),t=>t.min);
+    h += '<div class="pcol'+(lock?' lock':'')+'" '+(lock?'':'data-drop="'+ds+'"')+'><h4><span>'+WS[i]+' '+shortD(ds)+'</span><span class="muted small num">'+min+"'</span></h4>"+
+      tasks.map((t,j)=>'<div class="chip c-'+t.color+(t.kind==='bonus'?' bonus':'')+'" '+(lock?'':'draggable="true" data-drag="chip:'+ds+':'+j+'" data-ci="'+j+'"')+'>'+t.icon+' <span class="nm">'+esc(t.name)+'</span>'+(lock?'':'<button class="x" data-act="planRemove" data-date="'+ds+'" data-i="'+j+'" aria-label="Bỏ">×</button>')+'</div>').join('')+
+      (!lock && ui.selTask ? '<button class="btn small" data-act="planAdd" data-date="'+ds+'">Thêm vào đây</button>' : '')+'</div>';
+  }
+  h += '</div><section class="card row"><button class="btn small" data-act="tplSave">Đặt tuần này làm mẫu</button><button class="btn ghost small" data-act="tplApply">Áp mẫu cho tuần này</button><button class="btn ghost small" data-act="planCopy">Chép sang tuần sau</button></section>';
+  return h;
+}
+
+function viewTasksAdmin(){
+  const lib = S.tasks.filter(t=>!t.archived);
+  return '<section class="card"><div class="row" style="justify-content:space-between"><h3>Nhiệm vụ</h3><button class="btn small" data-act="taskNew">+ Nhiệm vụ mới</button></div>'+
+    '<div class="list" style="margin-top:10px">'+lib.map(t=>'<div class="li c-'+t.color+'"><span class="ic">'+t.icon+'</span><div class="grow"><b>'+esc(t.name)+'</b><div class="muted small">'+(t.kind==='bonus'?'Thưởng thêm · +'+t.pts+' điểm':'Nhiệm vụ chính · '+t.min+' phút'+(t.noMakeup?' · miễn học bù':''))+'</div></div><button class="btn ghost small" data-act="taskEdit" data-id="'+t.id+'">Sửa</button></div>').join('')+'</div>'+
+    '<p class="muted small" style="margin-top:10px">Điểm mỗi nhiệm vụ chính tự chia theo thời lượng, tổng '+S.settings.dailyMax+' điểm mỗi ngày tính điểm. Đổi số phút sẽ tính lại điểm của cả lịch sử.</p></section>';
+}
+function viewRewardsAdmin(){
+  return '<section class="card"><div class="row" style="justify-content:space-between"><h3>Phần thưởng</h3><button class="btn small" data-act="rwNew">+ Phần thưởng mới</button></div>'+
+    '<div class="list" style="margin-top:10px">'+S.rewards.map(r=>'<div class="li"><span class="ic">'+r.icon+'</span><div class="grow"><b>'+esc(r.name)+'</b><div class="muted small">'+(r.big?'Thưởng lớn (chọn 1 khi đạt cả tháng)':'Thưởng thường')+'</div></div><button class="btn ghost small" data-act="rwEdit" data-id="'+r.id+'">Sửa</button></div>').join('')+'</div></section>'+
+    '<section class="card"><h3 style="margin-bottom:8px">Quà đang chờ dùng</h3>'+
+    (S.vouchers.filter(v=>!v.used).length ? '<div class="list">'+S.vouchers.filter(v=>!v.used).map(v=>'<div class="li"><span class="ic">'+v.icon+'</span><span class="grow">'+esc(v.name)+'</span><button class="btn small" data-act="useVoucher" data-id="'+v.id+'">Đã dùng</button></div>').join('')+'</div>' : '<p class="muted">Không có.</p>')+'</section>';
+}
+function viewFix(){
+  const d = ui.fixDate, i = dayInfo(S,d,TODAY), all = i.core.concat(i.bonus);
+  return '<section class="card"><h3>Chỉnh sửa một ngày</h3><p class="muted small" style="margin:6px 0 10px">Dùng khi con làm bài nhưng quên tick, hoặc tick nhầm.</p>'+
+    '<div class="field" style="max-width:240px"><label for="fixd">Ngày</label><input class="in" id="fixd" type="date" value="'+d+'" min="'+S.startDate+'" max="'+TODAY+'" data-fix="date"></div>'+
+    '<div class="list" style="margin-top:12px">'+(all.length?all.map(x=>'<div class="li c-'+x.t.color+'"><span class="ic">'+x.t.icon+'</span><span class="grow">'+esc(x.t.name)+'</span><button class="btn small'+(x.done?' mint':' ghost')+'" data-act="fixToggle" data-id="'+x.t.id+'">'+(x.done?'Đã làm':'Chưa làm')+'</button></div>').join(''):'<p class="muted">Ngày này không có nhiệm vụ.</p>')+'</div>'+
+    '<p class="muted" style="margin-top:10px">Điểm ngày: <b class="num">'+fp(i.pts)+'</b>'+(i.max?' / '+i.max:'')+'</p></section>';
+}
+function viewSettings(){
+  const s = S.settings;
+  const rem = s.reminders.map((r,i)=>'<div class="row"><input class="in" style="width:120px" type="time" value="'+r.t+'" data-rem="t" data-i="'+i+'" aria-label="Giờ nhắc"><input class="in grow" value="'+esc(r.label)+'" data-rem="label" data-i="'+i+'" aria-label="Nội dung nhắc"><label class="chkrow"><input type="checkbox" '+(r.on?'checked':'')+' data-rem="on" data-i="'+i+'"> Bật</label><button class="x" data-act="remDel" data-i="'+i+'" aria-label="Xóa nhắc">×</button></div>').join('');
+  const lastB = S.lastBackup ? 'ngày '+shortD(S.lastBackup) : 'chưa lần nào';
+  return '<section class="card"><h3 style="margin-bottom:10px">Thông tin chung</h3><div class="form">'+
+    '<div class="field"><label for="s-kid">Tên của bé</label><input class="in" id="s-kid" value="'+esc(s.kid)+'" data-set="kid"></div>'+
+    '<div class="field"><label for="s-mascot">Tên linh vật</label><input class="in" id="s-mascot" value="'+esc(s.mascot)+'" data-set="mascot"></div>'+
+    '<div class="field"><label for="s-pin">Mã PIN phụ huynh (4 số)</label><input class="in" id="s-pin" inputmode="numeric" maxlength="4" value="'+esc(s.pin)+'" data-set="pin"></div>'+
+    '<div class="field"><label for="s-start">Ngày bắt đầu tính</label><input class="in" id="s-start" type="date" value="'+S.startDate+'" max="'+TODAY+'" data-set="startDate"></div></div>'+
+    '<label class="chkrow" style="margin-top:8px"><input type="checkbox" '+(s.sound?'checked':'')+' data-set="sound"> Bật âm thanh “ting”</label></section>'+
+    '<section class="card"><h3 style="margin-bottom:10px">Điểm và streak</h3><div class="form">'+
+    '<div class="field"><label for="s-dm">Điểm tối đa mỗi ngày</label><input class="in" id="s-dm" type="number" min="1" max="30" value="'+s.dailyMax+'" data-set="dailyMax"></div>'+
+    '<div class="field"><label for="s-wg">Điểm cần đạt để nhận thưởng tuần</label><input class="in" id="s-wg" type="number" min="1" value="'+s.weekGoal+'" data-set="weekGoal"></div>'+
+    '<div class="field"><label for="s-wb">Điểm tối đa của một tuần đủ ngày</label><input class="in" id="s-wb" type="number" min="1" value="'+s.weekBase+'" data-set="weekBase"></div>'+
+    '<div class="field"><label for="s-mr">Giữ streak khi hoàn thành từ (%)</label><input class="in" id="s-mr" type="number" min="10" max="100" value="'+Math.round(s.minRatio*100)+'" data-set="minRatio"></div></div>'+
+    '<div class="lab" style="margin-top:12px">Ngày tính điểm</div><div class="row">'+WS.map((w,i)=>'<label class="chkrow"><input type="checkbox" '+(s.scoringDays.includes(i)?'checked':'')+' data-set="sd" data-i="'+i+'"> '+w+'</label>').join('')+'</div>'+
+    '<p class="muted small" style="margin-top:8px">Ngày không tính điểm vẫn có nhiệm vụ để giữ streak, và hoạt động thưởng thêm vẫn cộng điểm. Tuần thiếu ngày (ví dụ tuần đầu) tự giảm mục tiêu theo tỉ lệ.</p></section>'+
+    '<section class="card"><div class="row" style="justify-content:space-between"><h3>Nhắc giờ</h3><button class="btn ghost small" data-act="remAdd">+ Thêm giờ</button></div>'+
+    '<p class="muted small" style="margin:6px 0 10px">Khi mở app đúng giờ, màn hình hiện lời nhắc kèm tiếng chuông. Để iPad nhắc cả khi không mở app, tạo lịch nhắc hằng ngày.</p><div class="list">'+rem+'</div>'+
+    '<div class="row" style="margin-top:10px"><button class="btn small" data-act="icsMake">Tạo lịch nhắc cho iPad (.ics)</button></div>'+
+    (ui.icsText?'<p class="muted small" style="margin-top:8px">Nếu file không tự tải xuống, chép nội dung dưới đây, dán vào Ghi chú rồi lưu thành file .ics:</p><textarea class="in code" readonly id="ics-box">'+esc(ui.icsText)+'</textarea>':'')+'</section>'+
+    '<section class="card"><h3 style="margin-bottom:6px">Sao lưu và khôi phục</h3><p class="muted small">Sao lưu gần nhất: <b>'+lastB+'</b>. '+(storageOK?'':'<b>Trình duyệt này không lưu được dữ liệu, hãy sao lưu thường xuyên.</b> ')+'Lưu file sao lưu (.json) vào iCloud Drive, Google Drive hoặc gửi AirDrop sang máy khác.</p>'+
+    '<div class="row" style="margin-top:10px"><button class="btn" data-act="bkSave">Tải file sao lưu</button><button class="btn ghost" data-act="bkCopy">Sao chép mã sao lưu</button></div>'+
+    (ui.backupText?'<textarea class="in code" readonly id="bk-box" style="margin-top:10px">'+esc(ui.backupText)+'</textarea>':'')+
+    '<div class="lab" style="margin-top:14px">Khôi phục</div><div class="row" style="margin-top:6px"><input class="in grow" type="file" id="bk-file" accept=".json,application/json" aria-label="Chọn file sao lưu"></div>'+
+    '<textarea class="in code" id="bk-paste" placeholder="Hoặc dán mã sao lưu vào đây" style="margin-top:8px"></textarea>'+
+    '<div class="row" style="margin-top:8px"><button class="btn ghost" data-act="bkPaste">Khôi phục từ mã đã dán</button></div>'+
+    (ui.pendingImport?'<div class="banner warn" style="margin-top:10px"><span class="grow">Dữ liệu hiện tại sẽ bị thay bằng bản sao lưu này. Tiếp tục?</span><button class="btn" data-act="bkConfirm">Khôi phục</button><button class="btn ghost" data-act="bkCancel">Hủy</button></div>':'')+'</section>'+
+    '<section class="card"><h3 style="margin-bottom:6px">Xóa toàn bộ</h3>'+
+    (ui.confirmReset?'<div class="banner warn"><span class="grow">Xóa hết điểm, streak, huy hiệu và quà? Không thể hoàn tác.</span><button class="btn" data-act="resetYes">Xóa hết</button><button class="btn ghost" data-act="resetNo">Giữ lại</button></div>':'<button class="btn coral small" data-act="resetAsk">Bắt đầu lại từ đầu</button>')+'</section>';
+}
+
+function viewParent(){
+  const tabs = [['plan','Kế hoạch tuần'],['tasks','Nhiệm vụ'],['rewards','Phần thưởng'],['fix','Chỉnh ngày'],['settings','Cài đặt']];
+  const stale = !S.lastBackup || addDays(S.lastBackup,7) <= TODAY;
+  let body = ui.ptab === 'plan' ? viewPlan() : ui.ptab === 'tasks' ? viewTasksAdmin() : ui.ptab === 'rewards' ? viewRewardsAdmin() : ui.ptab === 'fix' ? viewFix() : viewSettings();
+  return '<header class="card hero"><div class="grow"><h1>Khu phụ huynh</h1><p class="say">Sắp xếp nhiệm vụ, phần thưởng và sao lưu dữ liệu.</p></div><button class="btn mint" data-act="parentExit">Thoát</button></header>'+
+    (S.settings.pin === '1234' ? '<div class="banner warn">Đang dùng mã PIN mặc định 1234. Hãy đổi trong Cài đặt.</div>' : '')+
+    (stale ? '<div class="banner info"><span class="grow">Nên sao lưu dữ liệu mỗi tuần.</span><button class="btn" data-act="gotoBackup">Sao lưu ngay</button></div>' : '')+
+    '<div class="ptabs">'+tabs.map(t=>'<button class="ptab'+(ui.ptab===t[0]?' on':'')+'" data-act="ptab" data-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'+body;
+}
+
+/* ---------- modals ---------- */
+const TASK_ICONS = ['🤸','📒','🧮','🐼','🎧','🗣️','📘','🎹','🏊','🏓','♟️','📚','✏️','🎨','🚴','⚽','🧩','🔬','🎻','🧘','🏃','🪁','📖','🌱'];
+const RW_ICONS = ['🎮','☕','📖','🍦','🦆','🎢','🧱','🍕','🎬','🛍️','🎁','🏖️','🧸','🍰','🚲','🎡'];
+const COLORS = ['sun','mint','sky','coral','grape'];
+function modalHTML(){
+  const m = ui.modal; if(!m) return '';
+  let inner = '';
+  if(m.type === 'pin'){
+    const e = ui.pinErr;
+    inner = '<div class="sheet center" role="dialog" aria-label="Nhập mã PIN"><h2>Nhập mã PIN phụ huynh</h2><div class="pin-dots'+(e?' err':'')+'">'+[0,1,2,3].map(i=>'<i class="'+(i<m.buf.length?'f':'')+'"></i>').join('')+'</div>'+
+      '<p class="muted small">'+(e?'Sai mã, thử lại nhé':'Chỉ bố mẹ biết mã này')+'</p><div class="keys">'+
+      [1,2,3,4,5,6,7,8,9].map(n=>'<button data-act="pinKey" data-k="'+n+'">'+n+'</button>').join('')+
+      '<button data-act="pinDel" aria-label="Xóa">⌫</button><button data-act="pinKey" data-k="0">0</button><button data-act="pinClose" aria-label="Đóng">✕</button></div></div>';
+  } else if(m.type === 'badge'){
+    const b = BADGES.find(x=>x.id===m.id);
+    inner = '<div class="sheet center c-'+b.c+'"><p class="muted">Huy hiệu mới!</p><div class="badge" style="box-shadow:none"><div class="med" style="width:110px;height:110px;font-size:58px">'+b.icon+'</div></div><h2>'+b.name+'</h2><p>'+b.desc+'</p><button class="btn" data-act="badgeOk">Tuyệt vời!</button></div>';
+  } else if(m.type === 'pick'){
+    const opts = S.rewards.filter(r => m.kind === 'month' || !r.big);
+    const ok = m.kind === 'week' ? m.sel.length === 1 : ((m.sel.length === 1 && rewardById(m.sel[0]).big) || (m.sel.length === 2));
+    inner = '<div class="sheet" role="dialog" aria-label="Chọn phần thưởng"><h2>'+(m.kind==='month'?'Thưởng cả tháng!':'Thưởng cuối tuần!')+'</h2>'+
+      '<p class="muted">'+(m.kind==='month'?'Chọn 1 quà lớn hoặc 2 quà thường để nhận cùng lúc.':'Chọn 1 phần thưởng con thích.')+'</p><div class="list">'+
+      opts.map(r=>'<button class="rwd'+(m.sel.includes(r.id)?' on':'')+'" data-act="pickToggle" data-id="'+r.id+'"><span class="ic">'+r.icon+'</span><span class="grow"><b>'+esc(r.name)+'</b></span>'+(r.big?'<span class="tag bonus">Lớn</span>':'')+'</button>').join('')+'</div>'+
+      '<div class="row"><button class="btn mint" data-act="pickOk"'+(ok?'':' disabled')+'>Nhận quà</button><button class="btn ghost" data-act="modalClose">Để sau</button></div></div>';
+  } else if(m.type === 'task'){
+    const d = m.draft;
+    inner = '<div class="sheet" role="dialog" aria-label="Nhiệm vụ"><h2>'+(m.id?'Sửa nhiệm vụ':'Nhiệm vụ mới')+'</h2><div class="form">'+
+      '<div class="field"><label for="d-name">Tên</label><input class="in" id="d-name" value="'+esc(d.name)+'" data-draft="name"></div>'+
+      '<div class="field"><label for="d-kind">Loại</label><select class="in" id="d-kind" data-draft="kind"><option value="core"'+(d.kind==='core'?' selected':'')+'>Nhiệm vụ chính (chia điểm theo thời gian)</option><option value="bonus"'+(d.kind==='bonus'?' selected':'')+'>Thưởng thêm (cộng điểm cố định)</option></select></div>'+
+      (d.kind==='core' ? '<div class="field"><label for="d-min">Số phút</label><input class="in" id="d-min" type="number" min="5" step="5" value="'+d.min+'" data-draft="min"></div>' :
+        '<div class="field"><label for="d-pts">Điểm cộng thêm</label><input class="in" id="d-pts" type="number" min="1" step="0.5" value="'+d.pts+'" data-draft="pts"></div>')+'</div>'+
+      (d.kind==='core' ? '<label class="chkrow"><input type="checkbox" '+(d.noMakeup?'checked':'')+' data-draft="noMakeup"> Miễn học bù (ví dụ bài tập ở lớp)</label>' : '')+
+      '<div><div class="lab">Biểu tượng</div><div class="picker" style="margin-top:6px">'+TASK_ICONS.map(i=>'<button class="pick'+(d.icon===i?' on':'')+'" data-act="draftIcon" data-v="'+i+'">'+i+'</button>').join('')+'</div></div>'+
+      '<div><div class="lab">Màu</div><div class="row" style="margin-top:6px">'+COLORS.map(c=>'<button class="sw c-'+c+(d.color===c?' on':'')+'" data-act="draftColor" data-v="'+c+'" aria-label="Màu '+c+'"></button>').join('')+'</div></div>'+
+      '<div class="row"><button class="btn mint" data-act="taskSave">Lưu</button><button class="btn ghost" data-act="modalClose">Hủy</button>'+(m.id?'<button class="btn coral" data-act="taskDel">Xóa khỏi danh sách</button>':'')+'</div></div>';
+  } else if(m.type === 'reward'){
+    const d = m.draft;
+    inner = '<div class="sheet" role="dialog" aria-label="Phần thưởng"><h2>'+(m.id?'Sửa phần thưởng':'Phần thưởng mới')+'</h2>'+
+      '<div class="field"><label for="d-rname">Tên phần thưởng</label><input class="in" id="d-rname" value="'+esc(d.name)+'" data-draft="name"></div>'+
+      '<label class="chkrow"><input type="checkbox" '+(d.big?'checked':'')+' data-draft="big"> Thưởng lớn (dành cho cả tháng)</label>'+
+      '<div class="picker">'+RW_ICONS.map(i=>'<button class="pick'+(d.icon===i?' on':'')+'" data-act="draftIcon" data-v="'+i+'">'+i+'</button>').join('')+'</div>'+
+      '<div class="row"><button class="btn mint" data-act="rwSave">Lưu</button><button class="btn ghost" data-act="modalClose">Hủy</button>'+(m.id?'<button class="btn coral" data-act="rwDel">Xóa</button>':'')+'</div></div>';
+  }
+  return '<div class="overlay">'+inner+'</div>';
+}
+
+function render(){
+  if(!S) return;
+  const app = document.getElementById('app');
+  let h = '<div class="wrap">';
+  if(ui.banner) h += '<div class="banner info" role="status"><span class="grow">'+esc(ui.banner)+'</span><button class="btn" data-act="bannerOk">Biết rồi</button></div>';
+  if(!storageOK && !ui.parent) h += '<div class="banner warn">Trình duyệt chưa lưu được dữ liệu. Nhờ bố mẹ sao lưu thường xuyên nhé.</div>';
+  if(ui.parent) h += viewParent();
+  else h += header() + (ui.tab==='today'?viewToday():ui.tab==='week'?viewWeek():ui.tab==='cal'?viewCal():ui.tab==='badges'?viewBadges():viewRewards());
+  h += '</div>' + (ui.parent ? '' : tabbar()) + modalHTML() + (ui.toast ? '<div class="toast" role="status">'+esc(ui.toast)+'</div>' : '');
+  const keep = document.activeElement && document.activeElement.id;
+  app.innerHTML = h;
+  if(keep){ const el = document.getElementById(keep); if(el && el.focus && el.tagName !== 'BUTTON') try{ el.focus(); }catch(e){} }
+}
+
+/* ---------- events ---------- */
+function openPin(after){ ui.modal = {type:'pin',buf:'',after:after||null}; ui.pinErr = false; render(); }
+function claim(kind,key){
+  ui.modal = {type:'pick',kind,key,sel:[]}; render();
+}
+function pickToggle(id){
+  const m = ui.modal, r = rewardById(id); let sel = m.sel.slice();
+  if(sel.includes(id)) sel = sel.filter(x=>x!==id);
+  else if(m.kind === 'week') sel = [id];
+  else if(r.big) sel = [id];
+  else { sel = sel.filter(x=>!rewardById(x).big); sel.push(id); if(sel.length > 2) sel.shift(); }
+  m.sel = sel;
+}
+function pickOk(){
+  const m = ui.modal;
+  m.sel.forEach(id => {
+    const r = rewardById(id);
+    S.vouchers.push({id:'v'+Date.now().toString(36)+Math.floor(Math.random()*999),rewardId:id,name:r.name,icon:r.icon,big:!!r.big,
+      kind:m.kind,period:m.key,earnedAt:TODAY,used:false,usedAt:null});
+  });
+  S.claims[(m.kind==='month'?'M:':'W:')+m.key] = true;
+  ui.modal = null; ui.tab = 'rewards'; fanfare(); burst(true);
+  afterChange(); render();
+}
+
+function act(a,d,el){
+  switch(a){
+    case 'tab': ui.tab = d.tab; ui.calSel = null; window.scrollTo(0,0); break;
+    case 'tick': return tickToday(d.id);
+    case 'tickMk': return tickMakeup(d.date,d.id);
+    case 'openPin': return openPin(null);
+    case 'pinKey': {
+      const m = ui.modal; if(!m || m.type !== 'pin' || m.buf.length >= 4) return;
+      m.buf += d.k;
+      if(m.buf.length === 4){
+        if(m.buf === S.settings.pin){
+          const after = m.after; ui.modal = null; ui.pinErr = false;
+          if(after && after.act === 'useVoucher') useVoucher(after.id); else ui.parent = true;
+        } else { ui.pinErr = true; m.buf = ''; }
+      } else ui.pinErr = false;
+      break;
+    }
+    case 'pinDel': if(ui.modal) ui.modal.buf = ui.modal.buf.slice(0,-1); break;
+    case 'pinClose': case 'modalClose': ui.modal = null; break;
+    case 'parentExit': ui.parent = false; ui.selTask = null; break;
+    case 'ptab': ui.ptab = d.tab; break;
+    case 'gotoBackup': ui.ptab = 'settings'; break;
+    case 'bannerOk': ui.banner = null; break;
+    case 'badgeOk': ui.modal = null; openNextBadge(); break;
+    case 'claim': return claim(d.kind,d.key);
+    case 'pickToggle': pickToggle(d.id); break;
+    case 'pickOk': return pickOk();
+    case 'useVoucher': {
+      if(!ui.parent){ ui.modal = {type:'pin',buf:'',after:{act:'useVoucher',id:d.id}}; ui.pinErr = false; break; }
+      useVoucher(d.id); break;
+    }
+    case 'calPrev': { const y = +ui.calMonth.slice(0,4), mo = +ui.calMonth.slice(5); const n = new Date(y,mo-2,1); ui.calMonth = n.getFullYear()+'-'+pad(n.getMonth()+1); ui.calSel = null; break; }
+    case 'calNext': { const y = +ui.calMonth.slice(0,4), mo = +ui.calMonth.slice(5); const n = new Date(y,mo,1); ui.calMonth = n.getFullYear()+'-'+pad(n.getMonth()+1); ui.calSel = null; break; }
+    case 'calDay': ui.calSel = ui.calSel === d.date ? null : d.date; break;
+    /* planner */
+    case 'planPrev': if(ui.planWeek > mondayOf(TODAY)) ui.planWeek = addDays(ui.planWeek,-7); break;
+    case 'planNext': ui.planWeek = addDays(ui.planWeek,7); break;
+    case 'planSel': ui.selTask = ui.selTask === d.id ? null : d.id; break;
+    case 'planAdd': { const to = editablePlan(d.date); if(ui.selTask && !to.includes(ui.selTask)){ to.push(ui.selTask); S.plan[d.date] = to; save(); } else toast('Ngày này đã có nhiệm vụ đó'); break; }
+    case 'planRemove': { const arr = editablePlan(d.date); arr.splice(+d.i,1); S.plan[d.date] = arr; save(); break; }
+    case 'tplSave': for(let i = 0; i < 7; i++) S.template[i] = editablePlan(addDays(ui.planWeek,i)); save(); toast('Đã lưu làm mẫu cho các tuần sau'); return;
+    case 'tplApply': for(let i = 0; i < 7; i++){ const ds = addDays(ui.planWeek,i); if(ds >= TODAY) S.plan[ds] = (S.template[i]||[]).slice(); } save(); toast('Đã áp mẫu'); return;
+    case 'planCopy': for(let i = 0; i < 7; i++) S.plan[addDays(ui.planWeek,7+i)] = editablePlan(addDays(ui.planWeek,i)); save(); ui.planWeek = addDays(ui.planWeek,7); toast('Đã chép sang tuần sau'); return;
+    /* tasks */
+    case 'taskNew': ui.modal = {type:'task',id:null,draft:{name:'',kind:'core',min:15,pts:2,noMakeup:false,icon:'📚',color:'sun'}}; break;
+    case 'taskEdit': { const t = taskById(d.id); ui.modal = {type:'task',id:t.id,draft:{name:t.name,kind:t.kind,min:t.min||15,pts:t.pts||2,noMakeup:!!t.noMakeup,icon:t.icon,color:t.color}}; break; }
+    case 'draftIcon': ui.modal.draft.icon = d.v; break;
+    case 'draftColor': ui.modal.draft.color = d.v; break;
+    case 'taskSave': {
+      const dr = ui.modal.draft; if(!dr.name.trim()) return toast('Nhớ đặt tên nhiệm vụ');
+      const data = {name:dr.name.trim(),kind:dr.kind,min:dr.kind==='core'?Math.max(5,+dr.min||15):0,pts:dr.kind==='bonus'?Math.max(.5,+dr.pts||2):0,noMakeup:dr.kind==='core'&&!!dr.noMakeup,icon:dr.icon,color:dr.color};
+      if(ui.modal.id) Object.assign(taskById(ui.modal.id),data);
+      else S.tasks.push(Object.assign({id:'t'+Date.now().toString(36),archived:false},data));
+      ui.modal = null; afterChange(); break;
+    }
+    case 'taskDel': {
+      const id = ui.modal.id, t = taskById(id); t.archived = true;
+      for(let i = 0; i < 7; i++) S.template[i] = (S.template[i]||[]).filter(x=>x!==id);
+      Object.keys(S.plan).forEach(ds => { if(ds >= TODAY && !(S.done[ds] && S.done[ds][id])) S.plan[ds] = S.plan[ds].filter(x=>x!==id); });
+      ui.modal = null; afterChange(); break;
+    }
+    case 'rwNew': ui.modal = {type:'reward',id:null,draft:{name:'',icon:'🎁',big:false}}; break;
+    case 'rwEdit': { const r = rewardById(d.id); ui.modal = {type:'reward',id:r.id,draft:{name:r.name,icon:r.icon,big:!!r.big}}; break; }
+    case 'rwSave': {
+      const dr = ui.modal.draft; if(!dr.name.trim()) return toast('Nhớ đặt tên phần thưởng');
+      if(ui.modal.id) Object.assign(rewardById(ui.modal.id),{name:dr.name.trim(),icon:dr.icon,big:!!dr.big});
+      else S.rewards.push({id:'r'+Date.now().toString(36),name:dr.name.trim(),icon:dr.icon,big:!!dr.big});
+      ui.modal = null; save(); break;
+    }
+    case 'rwDel': S.rewards = S.rewards.filter(r=>r.id!==ui.modal.id); ui.modal = null; save(); break;
+    case 'fixToggle': {
+      S.done[ui.fixDate] = S.done[ui.fixDate] || {};
+      if(S.done[ui.fixDate][d.id]) delete S.done[ui.fixDate][d.id]; else S.done[ui.fixDate][d.id] = true;
+      afterChange(); break;
+    }
+    /* settings */
+    case 'remAdd': S.settings.reminders.push({t:'19:00',label:'Nhắc nhở',on:true}); save(); break;
+    case 'remDel': S.settings.reminders.splice(+d.i,1); save(); break;
+    case 'icsMake': {
+      const txt = buildICS(S,TODAY); ui.icsText = txt;
+      saveFile('nhac-gio-minh-tue.ics',txt,'text/calendar').then(()=>render());
+      break;
+    }
+    case 'bkSave': {
+      const txt = JSON.stringify(exportObj()); ui.backupText = txt;
+      saveFile('nhiem-vu-minh-tue-'+TODAY+'.json',txt,'application/json').then(r=>{
+        if(r === 'saved'){ S.lastBackup = TODAY; save(); toast('Đã lưu file sao lưu'); }
+        else if(r === 'anchor'){ S.lastBackup = TODAY; save(); toast('Đã yêu cầu tải file. Nếu không thấy, hãy chép mã bên dưới.'); }
+        else render();
+      });
+      break;
+    }
+    case 'bkCopy': {
+      const txt = JSON.stringify(exportObj()); ui.backupText = txt;
+      const done = () => { S.lastBackup = TODAY; save(); toast('Đã sao chép mã sao lưu'); };
+      try{ navigator.clipboard.writeText(txt).then(done,()=>render()); }catch(e){ render(); }
+      break;
+    }
+    case 'bkPaste': {
+      const box = document.getElementById('bk-paste');
+      try{ const st = validateBackup(JSON.parse(box.value)); if(!st) throw 0; ui.pendingImport = st; }
+      catch(e){ ui.pendingImport = null; toast('Mã sao lưu không hợp lệ'); return; }
+      break;
+    }
+    case 'bkConfirm': S = normalize(ui.pendingImport,TODAY); ensureMaterialized(S,TODAY); ui.pendingImport = null; ui.backupText = ''; afterChange(); toast('Đã khôi phục dữ liệu'); return;
+    case 'bkCancel': ui.pendingImport = null; break;
+    case 'resetAsk': ui.confirmReset = true; break;
+    case 'resetNo': ui.confirmReset = false; break;
+    case 'resetYes': {
+      S = defaultState(TODAY); ensureMaterialized(S,TODAY); ui.confirmReset = false; ui.parent = false; ui.tab = 'today'; save(); break;
+    }
+  }
+  render();
+}
+function useVoucher(id){
+  const v = S.vouchers.find(x=>x.id===id); if(v){ v.used = true; v.usedAt = TODAY; save(); toast('Đã đánh dấu đã dùng'); }
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if(!el || el.disabled) return;
+  act(el.dataset.act,el.dataset,el);
+});
+document.addEventListener('keydown', e => {
+  if((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.chip[data-act]')){ e.preventDefault(); act(e.target.dataset.act,e.target.dataset,e.target); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(t.dataset && t.dataset.draft && ui.modal && ui.modal.draft){
+    const k = t.dataset.draft;
+    ui.modal.draft[k] = t.type === 'checkbox' ? t.checked : t.value;
+    if(k === 'kind') render();
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target, ds = t.dataset || {};
+  if(ds.draft && ui.modal && ui.modal.draft){
+    ui.modal.draft[ds.draft] = t.type === 'checkbox' ? t.checked : t.value;
+    if(ds.draft === 'kind') render();
+    return;
+  }
+  if(ds.fix === 'date'){ if(t.value && t.value >= S.startDate && t.value <= TODAY){ ui.fixDate = t.value; } render(); return; }
+  if(ds.set){
+    const s = S.settings, v = t.value;
+    switch(ds.set){
+      case 'kid': s.kid = v.trim() || s.kid; break;
+      case 'mascot': s.mascot = v.trim() || s.mascot; break;
+      case 'pin': if(/^\d{4}$/.test(v)) s.pin = v; else toast('Mã PIN gồm đúng 4 chữ số'); break;
+      case 'startDate': if(/^\d{4}-\d{2}-\d{2}$/.test(v) && v <= TODAY){ S.startDate = v; ensureMaterialized(S,TODAY); } break;
+      case 'sound': s.sound = t.checked; break;
+      case 'dailyMax': s.dailyMax = Math.min(30,Math.max(1,+v||10)); break;
+      case 'weekGoal': s.weekGoal = Math.max(1,+v||45); break;
+      case 'weekBase': s.weekBase = Math.max(1,+v||50); break;
+      case 'minRatio': s.minRatio = Math.min(1,Math.max(.1,(+v||60)/100)); break;
+      case 'sd': { const i = +ds.i, set = new Set(s.scoringDays); if(t.checked) set.add(i); else set.delete(i); s.scoringDays = Array.from(set).sort(); break; }
+    }
+    afterChange(); render(); return;
+  }
+  if(ds.rem){
+    const r = S.settings.reminders[+ds.i]; if(!r) return;
+    if(ds.rem === 'on') r.on = t.checked; else if(ds.rem === 't') r.t = t.value || r.t; else r.label = t.value;
+    save(); return;
+  }
+  if(t.id === 'bk-file' && t.files && t.files[0]){
+    const fr = new FileReader();
+    fr.onload = () => {
+      try{ const st = validateBackup(JSON.parse(fr.result)); if(!st) throw 0; ui.pendingImport = st; render(); }
+      catch(err){ toast('File sao lưu không hợp lệ'); }
+    };
+    fr.readAsText(t.files[0]);
+  }
+});
+
+/* drag and drop for the weekly planner */
+document.addEventListener('dragstart', e => {
+  const el = e.target.closest && e.target.closest('[data-drag]'); if(!el) return;
+  try{ e.dataTransfer.setData('text/plain',el.dataset.drag); e.dataTransfer.effectAllowed = 'move'; }catch(err){}
+});
+document.addEventListener('dragover', e => {
+  const z = e.target.closest && e.target.closest('[data-drop]');
+  if(z){ e.preventDefault(); z.classList.add('over'); }
+});
+document.addEventListener('dragleave', e => {
+  const z = e.target.closest && e.target.closest('[data-drop]'); if(z) z.classList.remove('over');
+});
+document.addEventListener('drop', e => {
+  const z = e.target.closest && e.target.closest('[data-drop]'); if(!z) return;
+  e.preventDefault(); z.classList.remove('over');
+  let payload = ''; try{ payload = e.dataTransfer.getData('text/plain'); }catch(err){}
+  if(!payload) return;
+  const chip = e.target.closest('[data-ci]');
+  movePlan(payload,z.dataset.drop,chip ? +chip.dataset.ci : null);
+});
+
+/* clock: midnight rollover and reminders */
+const fired = {};
+function clock(){
+  if(!S) return;
+  const now = new Date(), ds = fmtD(now);
+  if(ds !== TODAY){
+    TODAY = ds; ensureMaterialized(S,TODAY);
+    if(!ui.parent){ ui.planWeek = mondayOf(TODAY); ui.calMonth = monthOf(TODAY); }
+    ui.fixDate = TODAY; afterChange(); render();
+  }
+  const hm = pad(now.getHours())+':'+pad(now.getMinutes());
+  S.settings.reminders.forEach(r => {
+    const k = ds+r.t;
+    if(r.on && r.t === hm && !fired[k]){ fired[k] = true; ui.banner = r.label; tone([784,988,1175],0.18); render(); }
+  });
+}
+document.addEventListener('visibilitychange', () => { if(!document.hidden) clock(); });
+setInterval(clock,15000);
+
+/* boot */
+S = load();
+if(!S){ S = defaultState(TODAY); }
+ensureMaterialized(S,TODAY);
+checkBadges(S,TODAY);
+save();
+render();
+// ==/UI==
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
