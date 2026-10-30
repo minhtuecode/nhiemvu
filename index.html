@@ -1010,6 +1010,13 @@ function modalHTML(){
       '<p class="muted small">'+(e?'Sai mã, thử lại nhé':'Chỉ bố mẹ biết mã này')+'</p><div class="keys">'+
       [1,2,3,4,5,6,7,8,9].map(n=>'<button data-act="pinKey" data-k="'+n+'">'+n+'</button>').join('')+
       '<button data-act="pinDel" aria-label="Xóa">⌫</button><button data-act="pinKey" data-k="0">0</button><button data-act="pinClose" aria-label="Đóng">✕</button></div></div>';
+  } else if(m.type === 'setup'){
+    const d = m.draft;
+    inner = '<div class="sheet" role="dialog" aria-label="Thiết lập lần đầu"><h2>Chào mừng!</h2><p class="muted">Nhập tên bé để bắt đầu. Mọi thứ sau đó bố mẹ có thể chỉnh trong khu phụ huynh (mã PIN mặc định 1234).</p><div class="form">'+
+      '<div class="field"><label for="d-sname">Tên của bé</label><input class="in" id="d-sname" value="'+esc(d.name)+'" data-draft="name"></div>'+
+      '<div class="field"><label for="d-smascot">Tên linh vật</label><input class="in" id="d-smascot" value="'+esc(d.mascot)+'" data-draft="mascot"></div></div>'+
+      '<label class="chkrow"><input type="checkbox" '+(d.blank?'checked':'')+' data-draft="blank"> Bắt đầu với danh sách trống (gia đình tự thêm nhiệm vụ và phần thưởng)</label>'+
+      '<div class="row"><button class="btn mint" data-act="setupOk">Bắt đầu</button></div></div>';
   } else if(m.type === 'who'){
     inner = '<div class="sheet center" role="dialog" aria-label="Chọn bạn nhỏ"><h2>Ai đang làm nhiệm vụ?</h2><div class="list" style="width:100%">'+
       PROF.list.map(p=>'<button class="rwd'+(p.id===PROF.active?' on':'')+'" data-act="switchProf" data-id="'+p.id+'"><span class="ic" aria-hidden="true">🐱</span><span class="grow"><b>'+esc(profName(p))+'</b></span></button>').join('')+'</div>'+
@@ -1099,7 +1106,7 @@ function createProfile(dr){
     const src = JSON.parse(JSON.stringify(S));
     ns.tasks = src.tasks; ns.template = src.template; ns.rewards = src.rewards; ns.settings = src.settings;
   } else {
-    ns.tasks = []; ns.template = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+    ns.tasks = []; ns.rewards = []; ns.template = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
   }
   ns.settings.kid = name; ns.settings.mascot = (dr.mascot||'').trim() || 'Mướp';
   PROF.list.push({id,key}); PROF.active = id; saveProf(); KEY = key;
@@ -1145,6 +1152,16 @@ function act(a,d,el){
     case 'tick': return tickToday(d.id);
     case 'tickMk': return tickMakeup(d.date,d.id);
     case 'openPin': return openPin(null);
+    case 'setupOk': {
+      const dr = ui.modal.draft, name = (dr.name||'').trim();
+      if(!name) return toast('Nhớ nhập tên của bé');
+      S.settings.kid = name; S.settings.mascot = (dr.mascot||'').trim() || 'Mướp';
+      if(dr.blank){ S.tasks = []; S.rewards = []; S.template = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]}; }
+      S.plan = {}; S.startDate = TODAY; ensureMaterialized(S,TODAY);
+      ui.modal = null; save(); saveProf();
+      if(dr.blank){ ui.parent = true; ui.ptab = 'tasks'; toast('Thêm nhiệm vụ cho '+name+' ở đây nhé'); return; }
+      break;
+    }
     case 'openWho': ui.modal = {type:'who'}; break;
     case 'switchProf': return switchProfile(d.id);
     case 'whoAdd': ui.modal = {type:'pin',buf:'',after:{act:'profAdd'}}; ui.pinErr = false; break;
@@ -1363,12 +1380,13 @@ setInterval(clock,15000);
 
 /* boot */
 S = load();
-if(!S){ S = defaultState(TODAY); }
+const firstRun = !S;
+if(firstRun){ S = defaultState(TODAY); }
 ensureMaterialized(S,TODAY);
 checkBadges(S,TODAY);
-save();
-saveProf();
-if(PROF.list.length > 1) ui.modal = {type:'who'};
+if(!firstRun){ save(); saveProf(); }
+if(firstRun) ui.modal = {type:'setup',draft:{name:'',mascot:'Mướp',blank:true}};
+else if(PROF.list.length > 1) ui.modal = {type:'who'};
 render();
 // ==/UI==
 </script>
